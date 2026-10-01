@@ -1,0 +1,10 @@
+{
+  "cli": { "version": ">= 16.0.0" },
+  "build": {
+    "demo": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" }
+    },
+    "production": { "autoIncrement": true }
+  }
+}
