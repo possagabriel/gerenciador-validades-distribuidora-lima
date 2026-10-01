@@ -1,0 +1,48 @@
+{% extends "gerente/base.html" %}
+
+{% block titulo %}Categorias{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Categorias</h1>
+    <a href="{% url 'gerente:categoria_create' %}" class="btn btn-primary">+ Nova categoria</a>
+</div>
+
+<div class="card">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Dias — Atenção</th>
+                <th>Dias — Crítico</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categoria in categorias %}
+            <tr>
+                <td>
+                    <a href="{% url 'gerente:categoria_update' categoria.pk %}" class="text-decoration-none">
+                        {{ categoria.nome }}
+                    </a>
+                </td>
+                <td>{{ categoria.dias_atencao }}</td>
+                <td>{{ categoria.dias_critico }}</td>
+                <td class="text-end">
+                    <a href="{% url 'gerente:categoria_update' categoria.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                    <form method="post" action="{% url 'gerente:categoria_delete' categoria.pk %}" class="d-inline"
+                          onsubmit="return confirm('Excluir a categoria \'{{ categoria.nome }}\'?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted py-4">Nenhuma categoria cadastrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "gerente/_paginacao.html" %}
+{% endblock %}

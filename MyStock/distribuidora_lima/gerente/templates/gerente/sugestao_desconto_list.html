@@ -1,0 +1,74 @@
+{% extends "gerente/base.html" %}
+
+{% block titulo %}Sugestão de desconto{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">Sugestão de desconto</h1>
+<p class="text-muted">
+    Lotes ainda não vencidos e não esgotados cuja categoria tem uma regra de desconto válida para
+    a quantidade de dias restantes até o vencimento.
+</p>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small">Categoria</label>
+                {{ filtro_form.categoria }}
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead>
+            <tr>
+                <th>Id do lote</th>
+                <th>Lote</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Qtd.</th>
+                <th>Preço venda</th>
+                <th>Custo unitário</th>
+                <th>Desconto</th>
+                <th class="text-end">Preço sugerido</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sugestoes %}
+            <tr class="{% if item.abaixo_do_custo %}table-danger{% endif %}">
+                <td>{{ item.lote.id }}</td>
+                <td>
+                    <a href="{% url 'gerente:lote_update' item.lote.pk %}" class="text-decoration-none">
+                        {{ item.lote.nome_lote }}
+                    </a>
+                </td>
+                <td>{{ item.lote.produto.nome }}</td>
+                <td>{{ item.lote.produto.categoria.nome }}</td>
+                <td>{{ item.lote.quantidade }}</td>
+                <td>R$ {{ item.lote.produto.preco_venda }}</td>
+                <td>R$ {{ item.lote.custo_unitario_compra }}</td>
+                <td>{{ item.regra.percentual }}%</td>
+                <td class="text-end fw-semibold">
+                    R$ {{ item.preco_sugerido|floatformat:2 }}
+                    {% if item.abaixo_do_custo %}
+                        <br>
+                        <span class="badge bg-danger" title="Este desconto deixa o preço abaixo do custo de compra">
+                            ⚠️ Este desconto deixa o preço abaixo do custo de compra
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center text-muted py-4">Nenhum lote com desconto sugerido no momento.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "gerente/_paginacao.html" %}
+{% endblock %}

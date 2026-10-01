@@ -1,0 +1,94 @@
+{% extends "gerente/base.html" %}
+
+{% block titulo %}Prejuízo — Lotes vencidos{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">Prejuízo — Lotes vencidos</h1>
+<p class="text-muted">
+    Considera apenas lotes com nível "Vencido" e que não estão marcados como esgotados.
+    O período filtra pela <strong>data de validade</strong> do lote (quando ele venceu).
+</p>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end mb-2">
+            <div class="col-md-3">
+                <label class="form-label small">De</label>
+                {{ filtro_form.data_inicio }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Até</label>
+                {{ filtro_form.data_fim }}
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+        {% for erro in filtro_form.non_field_errors %}
+            <div class="alert alert-danger py-2">{{ erro }}</div>
+        {% endfor %}
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm"
+               href="?data_inicio={{ atalho_semana.data_inicio|date:'Y-m-d' }}&data_fim={{ atalho_semana.data_fim|date:'Y-m-d' }}">
+                Venceram esta semana
+            </a>
+            <a class="btn btn-outline-secondary btn-sm"
+               href="?data_inicio={{ atalho_30_dias.data_inicio|date:'Y-m-d' }}&data_fim={{ atalho_30_dias.data_fim|date:'Y-m-d' }}">
+                Venceram nos últimos 30 dias
+            </a>
+        </div>
+
+        <p class="small text-muted mt-2 mb-0">
+            Período exibido: {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}
+        </p>
+    </div>
+</div>
+
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead>
+            <tr>
+                <th>Lote</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Quantidade</th>
+                <th>Custo unitário</th>
+                <th>Data de validade</th>
+                <th>Dias vencido</th>
+                <th class="text-end">Valor do prejuízo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lote in lotes %}
+            <tr>
+                <td>
+                    <a href="{% url 'gerente:lote_update' lote.pk %}" class="text-decoration-none">
+                        {{ lote.nome_lote }}
+                    </a>
+                </td>
+                <td>{{ lote.produto.nome }}</td>
+                <td>{{ lote.produto.categoria.nome }}</td>
+                <td>{{ lote.quantidade }}</td>
+                <td>R$ {{ lote.custo_unitario_compra }}</td>
+                <td>{{ lote.data_validade|date:"d/m/Y" }}</td>
+                <td>{{ lote.dias_vencido|default:"—" }}</td>
+                <td class="text-end fw-semibold text-danger">R$ {{ lote.valor_prejuizo|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="text-center text-muted py-4">Nenhum lote vencido encontrado nesse período.</td></tr>
+            {% endfor %}
+        </tbody>
+        {% if lotes %}
+        <tfoot>
+            <tr class="table-danger">
+                <td colspan="7" class="text-end fw-bold">Prejuízo total do período</td>
+                <td class="text-end fw-bold">R$ {{ total_prejuizo|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+</div>
+
+{% include "gerente/_paginacao.html" %}
+{% endblock %}
