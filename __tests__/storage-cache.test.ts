@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { clearTokens, getTokens, setTokens } from '../src/utils/storage';
+import { clearTokens, getTokens, replaceTokensIfCurrent, setTokens } from '../src/utils/storage';
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(),
@@ -25,6 +25,11 @@ test('reutiliza a sessão em memória e a atualiza após entrar ou sair', async 
   await setTokens({ access: 'novo', refresh: 'refresh-novo' });
   expect(await getTokens()).toEqual({ access: 'novo', refresh: 'refresh-novo' });
   expect(read).toHaveBeenCalledTimes(1);
+
+  expect(await replaceTokensIfCurrent('refresh-antigo', null)).toBe(false);
+  expect(await getTokens()).toEqual({ access: 'novo', refresh: 'refresh-novo' });
+  expect(await replaceTokensIfCurrent('refresh-novo', { access: 'renovado', refresh: 'refresh-renovado' })).toBe(true);
+  expect(await getTokens()).toEqual({ access: 'renovado', refresh: 'refresh-renovado' });
 
   await clearTokens();
   expect(await getTokens()).toBeNull();

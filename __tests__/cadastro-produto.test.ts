@@ -30,11 +30,12 @@ test('cria categoria, produto e código nas rotas reais da API', async () => {
   });
   api.onPost('produto-skus/').reply(config => {
     expect(JSON.parse(config.data)).toEqual({ produto: 9, codigo_barras: '7891234567890' });
-    return [201, { id: 10 }];
+    return [201, { id: 10, produto: 9, codigo_barras: '7891234567890' }];
   });
 
   const categoria = await criarCategoria('Bebidas');
   const produto = await criarProduto({ nome: 'Suco', categoria: categoria.id, preco_venda: 12.5 });
-  await criarCodigoBarras(produto.id, '7891234567890');
+  const sku = await criarCodigoBarras(produto.id, '7891234567890');
   expect(produto.id).toBe(9);
+  expect(sku.codigo_barras).toBe('7891234567890');
 });

@@ -9,3 +9,7 @@ export function normalizeList<T>(response: ListResponse<T>): { items: T[]; next:
 export function pageItems<T>(items: T[], page: number, size: number): T[] {
   return items.slice((page - 1) * size, page * size);
 }
+
+export function validPage(page: number, total: number, size: number): number {
+  return Math.min(Math.max(1, page), Math.max(1, Math.ceil(total / size)));
+}

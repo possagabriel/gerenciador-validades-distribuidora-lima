@@ -1,4 +1,4 @@
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { FlatList, RefreshControl, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQuery } from '@tanstack/react-query';
 import { obterDescontos } from '../api/relatorios';
@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
+import RefreshNotice from '../components/RefreshNotice';
 import { colors, common, radius } from '../components/theme';
 import { formatarMoeda } from '../utils/formatters';
 
@@ -14,11 +15,15 @@ export default function DescontosScreen(): React.JSX.Element {
   const query = useQuery({ queryKey: ['descontos'], queryFn: obterDescontos });
   useRefreshOnFocus('descontos');
   if (query.isLoading) return <LoadingState />;
-  if (query.isError || !query.data) return <ErrorState onRetry={() => void query.refetch()} />;
-  return <ScrollView style={common.page} contentContainerStyle={common.content}
-    refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={() => void query.refetch()} tintColor={colors.green} />}>
-    <ScreenHeading title="Descontos" subtitle={`${query.data.quantidade} ${query.data.quantidade === 1 ? 'sugestão' : 'sugestões'} para lotes em estoque`} />
-    {query.data.sugestoes.length ? query.data.sugestoes.map(item => <View key={item.lote_id} style={common.card}>
+  if (!query.data) return <ErrorState onRetry={() => void query.refetch()} />;
+  return <FlatList style={common.page} contentContainerStyle={common.content}
+    data={query.data.sugestoes} keyExtractor={item => String(item.lote_id)}
+    refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={() => void query.refetch()} tintColor={colors.green} />}
+    ListHeaderComponent={<>
+      <ScreenHeading title="Descontos" subtitle={`${query.data.quantidade} ${query.data.quantidade === 1 ? 'sugestão' : 'sugestões'} para lotes em estoque`} />
+      {query.isError ? <RefreshNotice onRetry={() => void query.refetch()} /> : null}
+    </>}
+    renderItem={({ item }) => <View style={common.card}>
       <View style={[common.row, { alignItems: 'flex-start', gap: 10 }]}>
         <Text style={[common.heading, { flex: 1 }]}>{item.produto}</Text>
         <View style={{ backgroundColor: colors.greenSoft, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 }}>
@@ -35,6 +40,7 @@ export default function DescontosScreen(): React.JSX.Element {
       {item.abaixo_do_custo ? <View style={{ backgroundColor: colors.dangerSoft, borderRadius: radius.input, padding: 10, marginTop: 12 }}>
         <Text style={{ color: colors.danger, fontWeight: '700' }}>Atenção: preço abaixo do custo</Text>
       </View> : null}
-    </View>) : <EmptyState icon="pricetag-outline" title="Nenhuma sugestão agora" description="Quando houver lotes próximos do vencimento, as sugestões aparecerão aqui." />}
-  </ScrollView>;
+    </View>}
+    ListEmptyComponent={<EmptyState icon="pricetag-outline" title="Nenhuma sugestão agora" description="Quando houver lotes próximos do vencimento, as sugestões aparecerão aqui." />}
+  />;
 }

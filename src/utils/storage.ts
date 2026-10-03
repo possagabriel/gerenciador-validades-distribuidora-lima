@@ -50,6 +50,18 @@ export async function clearTokens(): Promise<void> {
   });
 }
 
+// A atualização é serializada com login/logout para que um refresh antigo não
+// restaure a sessão depois que o usuário saiu ou entrou com outra conta.
+export async function replaceTokensIfCurrent(expectedRefresh: string, next: Tokens | null): Promise<boolean> {
+  return inOrder(async () => {
+    if (cachedTokens?.refresh !== expectedRefresh) return false;
+    if (next) await SecureStore.setItemAsync(KEY, JSON.stringify(next));
+    else await SecureStore.deleteItemAsync(KEY);
+    cachedTokens = next;
+    return true;
+  });
+}
+
 export function tokenExpired(token: string, skewSeconds = 0): boolean {
   try {
     const payload = jwtDecode<JwtPayload>(token);

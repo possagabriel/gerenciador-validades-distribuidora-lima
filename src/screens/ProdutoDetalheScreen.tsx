@@ -7,12 +7,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { criarCodigoBarras } from '../api/produtos';
 import { mensagemErro } from '../api/errors';
 import { useProduto } from '../hooks/useProdutos';
+import type { Produto } from '../types/produto';
 import type { ProductsStackParams } from '../navigation/types';
 import ActionButton from '../components/ActionButton';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
+import RefreshNotice from '../components/RefreshNotice';
 import { colors, common, radius, spacing, type } from '../components/theme';
 import { formatarMoeda } from '../utils/formatters';
 
@@ -31,19 +33,21 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
     if (!valor) { setErro('Informe o código de barras.'); return; }
     setSalvando(true); setErro('');
     try {
-      await criarCodigoBarras(params.id, valor);
-      await queryClient.invalidateQueries({ queryKey: ['produto', params.id] });
-      await queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      const sku = await criarCodigoBarras(params.id, valor);
+      queryClient.setQueryData<Produto>(['produto', params.id], current =>
+        current ? { ...current, skus: [...current.skus, sku] } : current);
+      void queryClient.invalidateQueries({ queryKey: ['produtos'] });
       setCodigo(''); setAdicionando(false);
     } catch (error) { setErro(mensagemErro(error, 'Não foi possível adicionar o código.')); }
     finally { setSalvando(false); }
   };
 
   if (query.isLoading) return <LoadingState />;
-  if (query.isError || !query.data) return <ErrorState onRetry={() => void query.refetch()} />;
+  if (!query.data) return <ErrorState onRetry={() => void query.refetch()} />;
   const produto = query.data;
   return <ScrollView style={common.page} contentContainerStyle={common.content}>
     <ScreenHeading title={produto.nome} subtitle={produto.categoria_nome} />
+    {query.isError ? <RefreshNotice onRetry={() => void query.refetch()} /> : null}
     <View style={[common.card, { borderRadius: radius.feature, padding: spacing.xl }]}>
       <Text style={common.muted}>Preço de venda</Text>
       <Text style={{ color: colors.ink, fontSize: 30, fontWeight: '800', marginTop: 5 }}>{formatarMoeda(produto.preco_venda)}</Text>
@@ -59,7 +63,7 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
     </View>
     {adicionando ? <View style={common.card}>
       <TextInput accessibilityLabel="Novo código de barras" value={codigo} onChangeText={setCodigo}
-        placeholder="Digite o código" keyboardType="number-pad" maxLength={50} style={[common.input, { marginBottom: 10 }]} />
+        placeholder="Digite o código" autoCapitalize="none" autoCorrect={false} maxLength={50} style={[common.input, { marginBottom: 10 }]} />
       {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 10 }}>{erro}</Text> : null}
       <ActionButton label="Salvar código" onPress={() => void salvarCodigo()} loading={salvando} />
     </View> : null}

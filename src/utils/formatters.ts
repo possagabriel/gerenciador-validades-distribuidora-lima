@@ -1,6 +1,6 @@
 import type { Lote } from '../types/lote';
 
-const dateFormatter = new Intl.DateTimeFormat('pt-BR');
+const dateFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' });
 const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export function validadeDoLote(lote: Lote): Date | null {
@@ -11,7 +11,7 @@ export function validadeDoLote(lote: Lote): Date | null {
   if (lote.tempo_vencimento !== null) {
     const date = new Date(lote.data_cadastro);
     if (Number.isNaN(date.getTime())) return null;
-    date.setDate(date.getDate() + lote.tempo_vencimento);
+    date.setUTCDate(date.getUTCDate() + lote.tempo_vencimento);
     return date;
   }
   return null;
@@ -20,12 +20,13 @@ export function validadeDoLote(lote: Lote): Date | null {
 export function diasRestantes(lote: Lote, now = new Date()): number | null {
   const data = validadeDoLote(lote);
   if (!data) return null;
-  return Math.ceil((data.getTime() - now.getTime()) / 86_400_000);
+  const dia = (value: Date) => Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate());
+  return (dia(data) - dia(now)) / 86_400_000;
 }
 
 export function formatarData(value: string | Date | null): string {
   if (!value) return 'Não informada';
-  const date = typeof value === 'string' ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00` : value) : value;
+  const date = typeof value === 'string' ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00Z` : value) : value;
   return Number.isNaN(date.getTime()) ? 'Não informada' : dateFormatter.format(date);
 }
 

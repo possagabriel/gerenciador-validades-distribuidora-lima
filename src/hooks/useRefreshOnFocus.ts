@@ -8,8 +8,9 @@ export function useRefreshOnFocus(scope: string, parameter?: string | number): v
   const queryClient = useQueryClient();
   useFocusEffect(useCallback(() => {
     const queryKey = parameter === undefined ? [scope] : [scope, parameter];
-    const updatedAt = queryClient.getQueryState(queryKey)?.dataUpdatedAt ?? 0;
-    if (updatedAt && Date.now() - updatedAt > MAX_AGE_MS) {
+    const state = queryClient.getQueryState(queryKey);
+    if (state && (state.isInvalidated || state.status === 'error' ||
+      (state.dataUpdatedAt > 0 && Date.now() - state.dataUpdatedAt > MAX_AGE_MS))) {
       void queryClient.invalidateQueries({ queryKey, exact: true, refetchType: 'active' });
     }
   }, [queryClient, scope, parameter]));

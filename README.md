@@ -1,6 +1,6 @@
 # Gerenciador de Validades — Distribuidora Lima (mobile)
 
-App de gestão em React Native, Expo SDK 57 e TypeScript. Consome a API Django do arquivo `MyStock.tar.gz`.
+App de gestão em React Native, Expo SDK 57 e TypeScript. Consome a API Django em `MyStock/distribuidora_lima`.
 
 ## Pré-requisitos
 
@@ -18,16 +18,20 @@ Edite `API_BASE_URL` com a origem da API, **sem** `/api` no fim. Exemplo: `API_B
 
 ## Executar
 
+Entre na pasta deste projeto, a que contém `package.json` e `src/`:
+
 ```bash
 npm install
 npx expo start
 ```
 
-Abra o QR code no Expo Go. O login usa as credenciais existentes do Django. Os JWTs ficam apenas no SecureStore; o app renova o access token e respeita o `exp` do refresh de sete dias.
+Abra o QR code no Expo Go. Se o aparelho mostrar uma versão antiga, encerre o Expo com `Ctrl+C`, rode `npx expo start --clear --lan` nesta pasta e leia o QR novo. O APK antigo não recebe mudanças do código automaticamente.
+
+O login usa as credenciais existentes do Django. Os JWTs são persistidos no SecureStore e reutilizados em memória durante a sessão. Uma falha temporária da rede na renovação não apaga a conta; um refresh expirado ou recusado pela API encerra a sessão.
 
 O app usa quatro abas: **Início**, **Produtos**, **Lotes** e **Mais**. Na tela **Produtos**, toque em **Adicionar produto** para cadastrar nome, categoria e preço. É possível criar uma categoria no próprio formulário e adicionar um código de barras opcional. O detalhe do produto também permite adicionar códigos depois. **Relatórios** e **Descontos** ficam em **Mais**. O mapa e os tokens visuais estão em [DESIGN.md](DESIGN.md).
 
-A busca aguarda 300 ms após a digitação antes de consultar a API. Ao voltar a uma lista ou análise, dados recentes são reutilizados; depois de 90 segundos, a tela atualiza. Puxe para atualizar a qualquer momento. O token é lido do SecureStore na restauração da sessão e reutilizado em memória nas requisições seguintes.
+A busca aguarda 300 ms após a digitação antes de consultar a API. Ao voltar a uma lista ou análise, dados recentes são reutilizados; depois de 90 segundos, a tela atualiza. Puxe para atualizar a qualquer momento. Se a atualização falhar, os últimos dados disponíveis continuam visíveis com uma opção de tentar novamente.
 
 No Expo Go, os alertas locais ficam desativados porque o módulo de notificações pode impedir a abertura do app no Android. Para testar os alertas, use um build próprio do app.
 

@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { criarCategoria, criarCodigoBarras, criarProduto, listarCategorias } from '../api/produtos';
 import { mensagemErro } from '../api/errors';
+import type { Categoria } from '../types/categoria';
 import type { ProductsStackParams } from '../navigation/types';
 import { lerPreco } from '../utils/formatters';
 import ActionButton from '../components/ActionButton';
@@ -35,7 +36,7 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
       setCategoriaId(categoria.id);
       setNovaCategoria('');
       setCriandoCategoria(false);
-      await queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      queryClient.setQueryData<Categoria[]>(['categorias'], current => [...(current ?? []), categoria]);
     } catch (error) { setErro(mensagemErro(error, 'Não foi possível criar a categoria.')); }
     finally { setSalvandoCategoria(false); }
   };
@@ -51,13 +52,17 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
     setSalvando(true); setErro('');
     try {
       const produto = await criarProduto({ nome: valorNome, categoria: categoriaId, preco_venda: valorPreco });
-      await queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      let produtoSalvo = produto;
       let aviso: string | null = null;
       if (valorCodigo) {
-        try { await criarCodigoBarras(produto.id, valorCodigo); }
+        try {
+          const sku = await criarCodigoBarras(produto.id, valorCodigo);
+          produtoSalvo = { ...produto, skus: [...produto.skus, sku] };
+        }
         catch (error) { aviso = mensagemErro(error, 'Não foi possível salvar o código de barras.'); }
       }
-      await queryClient.invalidateQueries({ queryKey: ['produto', produto.id] });
+      queryClient.setQueryData(['produto', produto.id], produtoSalvo);
+      void queryClient.invalidateQueries({ queryKey: ['produtos'] });
       navigation.replace('ProdutoDetalhe', { id: produto.id });
       if (aviso) Alert.alert('Produto criado', `O produto foi salvo, mas o código de barras não: ${aviso}`);
     } catch (error) { setErro(mensagemErro(error, 'Não foi possível criar o produto.')); }
@@ -108,8 +113,8 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
       <View style={common.card}>
         <Text style={common.heading}>Código de barras</Text>
         <Text style={[common.muted, { marginTop: 4, marginBottom: 14 }]}>Opcional. Você também pode adicionar depois.</Text>
-        <TextInput accessibilityLabel="Código de barras" placeholder="Digite o número do código" value={codigo}
-          onChangeText={setCodigo} keyboardType="number-pad" maxLength={50} style={common.input} />
+        <TextInput accessibilityLabel="Código de barras" placeholder="Digite o código" value={codigo}
+          onChangeText={setCodigo} autoCapitalize="none" autoCorrect={false} maxLength={50} style={common.input} />
       </View>
 
       {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 12, fontSize: 14 }}>{erro}</Text> : null}

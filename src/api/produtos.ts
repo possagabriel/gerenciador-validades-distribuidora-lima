@@ -2,6 +2,7 @@ import { client } from './client';
 import { normalizeList, type ListResponse } from './pagination';
 import type { Produto } from '../types/produto';
 import type { Categoria } from '../types/categoria';
+import type { SKU } from '../types/sku';
 
 export interface NovoProduto { nome: string; categoria: number; preco_venda: number }
 
@@ -30,8 +31,9 @@ export async function criarProduto(produto: NovoProduto): Promise<Produto> {
   return data;
 }
 
-export async function criarCodigoBarras(produto: number, codigo_barras: string): Promise<void> {
-  await client.post('produto-skus/', { produto, codigo_barras });
+export async function criarCodigoBarras(produto: number, codigo_barras: string): Promise<SKU> {
+  const { data } = await client.post<SKU>('produto-skus/', { produto, codigo_barras });
+  return data;
 }
 
 export async function buscarCodigoBarras(codigo: string): Promise<Produto | null> {

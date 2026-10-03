@@ -18,19 +18,23 @@ export function AuthProvider({ children }: PropsWithChildren): React.JSX.Element
 
   useEffect(() => {
     let active = true;
+    let latestSync = 0;
     const sync = async () => {
+      const currentSync = ++latestSync;
       try {
         const valid = await restoreSession();
-        if (active) setAuthenticated(valid);
+        if (active && currentSync === latestSync) setAuthenticated(valid);
       } catch {
-        if (active) setAuthenticated(false);
+        if (active && currentSync === latestSync) setAuthenticated(false);
+      } finally {
+        if (active && currentSync === latestSync) setLoading(false);
       }
     };
     const unsubscribe = subscribeSession(() => { void sync(); });
     const appState = AppState.addEventListener('change', state => { if (state === 'active') void sync(); });
     // O intervalo cobre a sessão aberta sem requisições; ao voltar do fundo, verificamos imediatamente.
     const timer = setInterval(() => { if (AppState.currentState === 'active') void sync(); }, 60_000);
-    void sync().finally(() => { if (active) setLoading(false); });
+    void sync();
     return () => { active = false; unsubscribe(); appState.remove(); clearInterval(timer); };
   }, []);
 

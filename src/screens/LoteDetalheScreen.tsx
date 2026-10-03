@@ -5,6 +5,7 @@ import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import NivelVencimentoBadge from '../components/NivelVencimentoBadge';
 import ScreenHeading from '../components/ScreenHeading';
+import RefreshNotice from '../components/RefreshNotice';
 import { colors, common } from '../components/theme';
 import { diasRestantes, formatarData, formatarMoeda, validadeDoLote } from '../utils/formatters';
 
@@ -20,12 +21,13 @@ export default function LoteDetalheScreen(): React.JSX.Element {
   const id = (route.params as { id: number }).id;
   const query = useLote(id);
   if (query.isLoading) return <LoadingState />;
-  if (query.isError || !query.data) return <ErrorState onRetry={() => void query.refetch()} />;
+  if (!query.data) return <ErrorState onRetry={() => void query.refetch()} />;
   const lote = query.data;
   const dias = diasRestantes(lote);
   const prazo = dias === null ? 'Prazo não informado' : dias < 0 ? `Vencido há ${-dias} dias` : dias === 0 ? 'Vence hoje' : `${dias} dias restantes`;
   return <ScrollView style={common.page} contentContainerStyle={common.content}>
     <ScreenHeading title={lote.produto_nome} subtitle={lote.nome_lote} />
+    {query.isError ? <RefreshNotice onRetry={() => void query.refetch()} /> : null}
     <View style={common.card}>
       <View style={common.row}><Text style={common.muted}>Situação</Text><NivelVencimentoBadge nivel={lote.nivel_vencimento} /></View>
       <Text style={{ color: colors.greenDark, fontSize: 28, fontWeight: '800', marginTop: 16 }}>{formatarData(validadeDoLote(lote))}</Text>

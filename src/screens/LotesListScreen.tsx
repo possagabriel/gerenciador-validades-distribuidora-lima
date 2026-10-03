@@ -12,8 +12,9 @@ import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
 import Pagination from '../components/Pagination';
 import ScreenHeading from '../components/ScreenHeading';
+import RefreshNotice from '../components/RefreshNotice';
 import { colors, common, radius, spacing } from '../components/theme';
-import { pageItems } from '../api/pagination';
+import { pageItems, validPage } from '../api/pagination';
 
 const PAGE_SIZE = 20;
 const filters: { label: string; value: NivelVencimento | undefined }[] = [
@@ -31,7 +32,8 @@ export default function LotesListScreen(): React.JSX.Element {
   const query = useLotes(nivel);
   useRefreshOnFocus('lotes', nivel ?? 'todos');
   const all = useMemo(() => (query.data ?? []).filter(item => produtoId === undefined || item.produto === produtoId), [query.data, produtoId]);
-  const visible = useMemo(() => pageItems(all, page, PAGE_SIZE), [all, page]);
+  const currentPage = validPage(page, all.length, PAGE_SIZE);
+  const visible = useMemo(() => pageItems(all, currentPage, PAGE_SIZE), [all, currentPage]);
   return <View style={common.page}>
     <ScreenHeading title={produtoId ? 'Lotes do produto' : 'Lotes'}
       subtitle={`${all.length} ${all.length === 1 ? 'lote' : 'lotes'} nesta lista`} />
@@ -48,12 +50,13 @@ export default function LotesListScreen(): React.JSX.Element {
         <Text style={{ color: nivel === filter.value ? colors.white : colors.muted, fontWeight: '700' }}>{filter.label}</Text>
       </Pressable>)}
     </ScrollView>
-    {query.isLoading ? <LoadingState /> : query.isError ? <ErrorState onRetry={() => void query.refetch()} /> :
+    {query.data && query.isError ? <RefreshNotice onRetry={() => void query.refetch()} /> : null}
+    {query.isLoading ? <LoadingState /> : query.isError && !query.data ? <ErrorState onRetry={() => void query.refetch()} /> :
       <FlatList data={visible} keyExtractor={item => String(item.id)}
         refreshing={query.isRefetching} onRefresh={() => void query.refetch()} contentContainerStyle={common.content}
         renderItem={({ item }) => <LoteCard lote={item} onPress={() => navigation.navigate('LoteDetalhe', { id: item.id })} />}
         ListEmptyComponent={<EmptyState icon="calendar-outline" title="Nenhum lote nesta lista"
           description="Tente outro filtro para conferir as validades." />}
-        ListFooterComponent={<Pagination page={page} total={all.length} pageSize={PAGE_SIZE} onChange={setPage} />} />}
+        ListFooterComponent={<Pagination page={currentPage} total={all.length} pageSize={PAGE_SIZE} onChange={setPage} />} />}
   </View>;
 }

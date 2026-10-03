@@ -1,5 +1,5 @@
-import { normalizeList, pageItems } from '../src/api/pagination';
-import { diasRestantes } from '../src/utils/formatters';
+import { normalizeList, pageItems, validPage } from '../src/api/pagination';
+import { diasRestantes, formatarData } from '../src/utils/formatters';
 import { dataAlerta } from '../src/utils/notifications';
 import type { Lote } from '../src/types/lote';
 
@@ -21,8 +21,20 @@ describe('contratos de leitura', () => {
       .toEqual({ items: [lote], next: 'http://api/?page=2', count: 20 });
   });
 
+  test('volta para página válida quando a lista diminui', () => {
+    expect(validPage(3, 1, 20)).toBe(1);
+    expect(validPage(3, 41, 20)).toBe(3);
+  });
+
   test('calcula dias pela data de validade real', () => {
     expect(diasRestantes(lote, new Date('2026-10-01T12:00:00Z'))).toBe(3);
+  });
+
+  test('conta dias de calendário em UTC como a API', () => {
+    expect(diasRestantes(lote, new Date('2026-10-04T00:01:00Z'))).toBe(0);
+    expect(diasRestantes(lote, new Date('2026-10-05T00:01:00Z'))).toBe(-1);
+    expect(formatarData('2026-10-04T00:00:00Z')).toBe('04/10/2026');
+    expect(formatarData('2026-10-04')).toBe('04/10/2026');
   });
 
   test('usa cadastro mais tempo de vencimento como alternativa', () => {
