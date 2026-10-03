@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { criarCategoria, criarCodigoBarras, criarProduto, listarCategorias } from '../api/produtos';
+import type { LoteInicial } from '../api/produtos';
 import { mensagemErro } from '../api/errors';
 import type { Categoria } from '../types/categoria';
 import type { ProductsStackParams } from '../navigation/types';
@@ -13,6 +14,15 @@ import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
 import { colors, common, radius, spacing } from '../components/theme';
 
+type GrupoLote = { dataValidade: string; quantidade: string; custo: string };
+const novoGrupoLote = (): GrupoLote => ({ dataValidade: '', quantidade: '', custo: '' });
+
+function dataValidadeValida(valor: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
+  const data = new Date(`${valor}T00:00:00Z`);
+  return Number.isFinite(data.getTime()) && data.toISOString().slice(0, 10) === valor;
+}
+
 export default function AdicionarProdutoScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<ProductsStackParams>>();
   const queryClient = useQueryClient();
@@ -21,6 +31,7 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
   const [categoriaId, setCategoriaId] = useState<number | null>(null);
   const [preco, setPreco] = useState('');
   const [codigo, setCodigo] = useState('');
+  const [gruposLote, setGruposLote] = useState<GrupoLote[]>([novoGrupoLote()]);
   const [novaCategoria, setNovaCategoria] = useState('');
   const [criandoCategoria, setCriandoCategoria] = useState(false);
   const [salvandoCategoria, setSalvandoCategoria] = useState(false);
@@ -49,9 +60,27 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
     if (!categoriaId) { setErro('Selecione ou crie uma categoria.'); return; }
     if (valorPreco === null) { setErro('Informe um preço válido, como 19,90.'); return; }
     if (valorCodigo.length > 50) { setErro('O código de barras deve ter até 50 caracteres.'); return; }
+    const lotesIniciais: LoteInicial[] = [];
+    for (const [index, grupo] of gruposLote.entries()) {
+      const quantidade = Number(grupo.quantidade);
+      const custo = lerPreco(grupo.custo);
+      if (!dataValidadeValida(grupo.dataValidade)) {
+        setErro(`Informe uma data válida no lote ${index + 1}, no formato AAAA-MM-DD.`); return;
+      }
+      if (!Number.isSafeInteger(quantidade) || quantidade < 1) {
+        setErro(`Informe a quantidade de unidades do lote ${index + 1}.`); return;
+      }
+      if (custo === null || custo < 0) {
+        setErro(`Informe o custo de compra por unidade do lote ${index + 1}.`); return;
+      }
+      lotesIniciais.push({ data_validade: grupo.dataValidade, quantidade, custo_unitario_compra: custo });
+    }
+    if (new Set(lotesIniciais.map(lote => lote.data_validade)).size !== lotesIniciais.length) {
+      setErro('Use uma linha por data de validade.'); return;
+    }
     setSalvando(true); setErro('');
     try {
-      const produto = await criarProduto({ nome: valorNome, categoria: categoriaId, preco_venda: valorPreco });
+      const produto = await criarProduto({ nome: valorNome, categoria: categoriaId, preco_venda: valorPreco, lotes_iniciais: lotesIniciais });
       let produtoSalvo = produto;
       let aviso: string | null = null;
       if (valorCodigo) {
@@ -63,6 +92,7 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
       }
       queryClient.setQueryData(['produto', produto.id], produtoSalvo);
       void queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      void queryClient.invalidateQueries({ queryKey: ['lotes'] });
       navigation.replace('ProdutoDetalhe', { id: produto.id });
       if (aviso) Alert.alert('Produto criado', `O produto foi salvo, mas o código de barras não: ${aviso}`);
     } catch (error) { setErro(mensagemErro(error, 'Não foi possível criar o produto.')); }
@@ -108,6 +138,45 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
         <TextInput accessibilityLabel="Preço de venda" placeholder="0,00" value={preco} onChangeText={setPreco}
           keyboardType="decimal-pad" style={[common.input, { marginBottom: 6 }]} />
         <Text style={common.muted}>Valor por unidade, em reais.</Text>
+      </View>
+
+      <View style={common.card}>
+        <View style={[common.row, { marginBottom: 6 }]}>
+          <Text style={common.heading}>Estoque e validade</Text>
+          <Pressable accessibilityRole="button" onPress={() => setGruposLote(current => [...current, novoGrupoLote()])}
+            style={{ minHeight: 44, justifyContent: 'center' }}>
+            <Text style={{ color: colors.greenDark, fontWeight: '700' }}>Adicionar validade</Text>
+          </Pressable>
+        </View>
+        <Text style={[common.muted, { marginBottom: 14 }]}>Cada data cria um lote separado para controlar o estoque.</Text>
+        {gruposLote.map((grupo, index) => <View key={index} style={{ borderTopWidth: index ? 1 : 0, borderColor: colors.border, paddingTop: index ? 14 : 0, marginTop: index ? 6 : 0, marginBottom: 14 }}>
+          <View style={[common.row, { marginBottom: 8 }]}>
+            <Text style={{ color: colors.ink, fontWeight: '700' }}>Lote {index + 1}</Text>
+            {gruposLote.length > 1 ? <Pressable accessibilityRole="button" accessibilityLabel={`Remover lote ${index + 1}`}
+              onPress={() => setGruposLote(current => current.filter((_, itemIndex) => itemIndex !== index))}
+              style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}>
+              <Text style={{ color: colors.danger, fontWeight: '700' }}>Remover</Text>
+            </Pressable> : null}
+          </View>
+          <Text style={[common.muted, { marginBottom: 6 }]}>Data de validade *</Text>
+          <TextInput accessibilityLabel={`Data de validade do lote ${index + 1}`} placeholder="AAAA-MM-DD"
+            value={grupo.dataValidade} onChangeText={value => setGruposLote(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, dataValidade: value } : item))}
+            keyboardType="numbers-and-punctuation" maxLength={10} style={[common.input, { marginBottom: 12 }]} />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={[common.muted, { marginBottom: 6 }]}>Unidades *</Text>
+              <TextInput accessibilityLabel={`Quantidade do lote ${index + 1}`} placeholder="0" value={grupo.quantidade}
+                onChangeText={value => setGruposLote(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, quantidade: value.replace(/[^0-9]/g, '') } : item))}
+                keyboardType="number-pad" style={common.input} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[common.muted, { marginBottom: 6 }]}>Custo por unidade *</Text>
+              <TextInput accessibilityLabel={`Custo de compra do lote ${index + 1}`} placeholder="0,00" value={grupo.custo}
+                onChangeText={value => setGruposLote(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, custo: value } : item))}
+                keyboardType="decimal-pad" style={common.input} />
+            </View>
+          </View>
+        </View>)}
       </View>
 
       <View style={common.card}>

@@ -48,6 +48,47 @@ class LoteApiTestsBase(APITestCase):
         return lote
 
 
+class CriacaoProdutoComLotesApiTests(LoteApiTestsBase):
+    def test_cria_produto_com_um_lote_por_data_de_validade(self):
+        response = self.client.post(
+            "/api/produtos/",
+            {
+                "nome": "Leite",
+                "categoria": self.categoria.pk,
+                "preco_venda": 4.5,
+                "lotes_iniciais": [
+                    {"data_validade": "2027-04-30", "quantidade": 12, "custo_unitario_compra": "2.10"},
+                    {"data_validade": "2027-06-30", "quantidade": 8, "custo_unitario_compra": "2.25"},
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201, response.data)
+        produto = Produto.objects.get(pk=response.data["id"])
+        lotes = list(Lote.objects.filter(produto=produto).order_by("data_validade"))
+        self.assertEqual(len(lotes), 2)
+        self.assertEqual([lote.data_validade.date().isoformat() for lote in lotes], ["2027-04-30", "2027-06-30"])
+        self.assertEqual([lote.quantidade for lote in lotes], [12, 8])
+
+    def test_rejeita_duas_linhas_com_a_mesma_validade(self):
+        response = self.client.post(
+            "/api/produtos/",
+            {
+                "nome": "Leite",
+                "categoria": self.categoria.pk,
+                "preco_venda": 4.5,
+                "lotes_iniciais": [
+                    {"data_validade": "2027-04-30", "quantidade": 12, "custo_unitario_compra": "2.10"},
+                    {"data_validade": "2027-04-30", "quantidade": 8, "custo_unitario_compra": "2.25"},
+                ],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Produto.objects.filter(nome="Leite").exists())
+
 class LoteFiltrosApiTests(LoteApiTestsBase):
     def test_filtro_por_categoria(self):
         outra_categoria = Categoria.objects.create(nome="Limpeza")

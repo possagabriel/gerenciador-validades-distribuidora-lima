@@ -25,7 +25,10 @@ test('cria categoria, produto e código nas rotas reais da API', async () => {
     return [201, { id: 3, nome: 'Bebidas', dias_atencao: 30, dias_critico: 7 }];
   });
   api.onPost('produtos/').reply(config => {
-    expect(JSON.parse(config.data)).toEqual({ nome: 'Suco', categoria: 3, preco_venda: 12.5 });
+    expect(JSON.parse(config.data)).toEqual({ nome: 'Suco', categoria: 3, preco_venda: 12.5, lotes_iniciais: [
+      { data_validade: '2027-04-30', quantidade: 20, custo_unitario_compra: 6.25 },
+      { data_validade: '2027-06-30', quantidade: 15, custo_unitario_compra: 6 },
+    ] });
     return [201, { id: 9, nome: 'Suco', categoria: 3, categoria_nome: 'Bebidas', preco_venda: 12.5, skus: [] }];
   });
   api.onPost('produto-skus/').reply(config => {
@@ -34,7 +37,10 @@ test('cria categoria, produto e código nas rotas reais da API', async () => {
   });
 
   const categoria = await criarCategoria('Bebidas');
-  const produto = await criarProduto({ nome: 'Suco', categoria: categoria.id, preco_venda: 12.5 });
+  const produto = await criarProduto({ nome: 'Suco', categoria: categoria.id, preco_venda: 12.5, lotes_iniciais: [
+    { data_validade: '2027-04-30', quantidade: 20, custo_unitario_compra: 6.25 },
+    { data_validade: '2027-06-30', quantidade: 15, custo_unitario_compra: 6 },
+  ] });
   const sku = await criarCodigoBarras(produto.id, '7891234567890');
   expect(produto.id).toBe(9);
   expect(sku.codigo_barras).toBe('7891234567890');

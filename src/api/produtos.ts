@@ -4,7 +4,8 @@ import type { Produto } from '../types/produto';
 import type { Categoria } from '../types/categoria';
 import type { SKU } from '../types/sku';
 
-export interface NovoProduto { nome: string; categoria: number; preco_venda: number }
+export interface LoteInicial { data_validade: string; quantidade: number; custo_unitario_compra: number }
+export interface NovoProduto { nome: string; categoria: number; preco_venda: number; lotes_iniciais: LoteInicial[] }
 
 export async function listarProdutos(search = ''): Promise<Produto[]> {
   const { data } = await client.get<ListResponse<Produto>>('produtos/', { params: search ? { search } : undefined });

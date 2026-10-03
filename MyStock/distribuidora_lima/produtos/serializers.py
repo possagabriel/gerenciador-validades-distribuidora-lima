@@ -1,3 +1,6 @@
+from datetime import datetime, time
+
+from django.utils import timezone
 from rest_framework import serializers
 
 from .models import Categoria, Lote, Produto, ProdutoSKU, RegraDesconto
@@ -28,13 +31,49 @@ class ProdutoSKUSerializer(serializers.ModelSerializer):
         fields = ["id", "produto", "codigo_barras"]
 
 
+class LoteInicialSerializer(serializers.Serializer):
+    quantidade = serializers.IntegerField(min_value=1)
+    custo_unitario_compra = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0)
+    data_validade = serializers.DateField()
+
+    def validate_data_validade(self, value):
+        if value < timezone.now().date():
+            raise serializers.ValidationError("A validade não pode estar no passado.")
+        return value
+
+
 class ProdutoSerializer(serializers.ModelSerializer):
     categoria_nome = serializers.CharField(source="categoria.nome", read_only=True)
     skus = ProdutoSKUSerializer(many=True, read_only=True)
+    lotes_iniciais = LoteInicialSerializer(many=True, write_only=True, min_length=1)
 
     class Meta:
         model = Produto
-        fields = ["id", "nome", "categoria", "categoria_nome", "preco_venda", "skus"]
+        fields = [
+            "id", "nome", "categoria", "categoria_nome", "preco_venda", "skus",
+            "lotes_iniciais",
+        ]
+
+    def create(self, validated_data):
+        from django.db import transaction
+
+        lotes = validated_data.pop("lotes_iniciais", [])
+        with transaction.atomic():
+            produto = super().create(validated_data)
+            for dados_lote in lotes:
+                dados_lote["data_validade"] = timezone.make_aware(
+                    datetime.combine(dados_lote["data_validade"], time.min)
+                )
+                Lote.objects.create(produto=produto, **dados_lote)
+        return produto
+
+    def validate_lotes_iniciais(self, value):
+        datas = [lote["data_validade"] for lote in value]
+        if len(set(datas)) != len(datas):
+            raise serializers.ValidationError(
+                "Use um lote para cada data de validade."
+            )
+        return value
 
 
 class LoteSerializer(serializers.ModelSerializer):
