@@ -14,8 +14,8 @@ export async function listarProdutos(search = '', url = 'produtos/'): Promise<Li
   return normalizeList<Produto>(data);
 }
 
-export async function detalharProduto(id: number): Promise<Produto> {
-  const { data } = await client.get<Produto>(`produtos/${id}/`);
+export async function detalharProduto(id: number, timeout?: number): Promise<Produto> {
+  const { data } = await client.get<Produto>(`produtos/${id}/`, timeout === undefined ? undefined : { timeout });
   return data;
 }
 
@@ -59,6 +59,7 @@ export async function criarCodigoBarras(produto: number, codigo_barras: string):
 }
 
 export async function buscarCodigoBarras(codigo: string): Promise<Produto | null> {
+  const scanTimeout = 5000;
   const valor = codigo.trim();
   if (!valor) return null;
   const candidatos = [valor];
@@ -72,10 +73,10 @@ export async function buscarCodigoBarras(codigo: string): Promise<Produto | null
     while (url) {
       if (visitadas.has(url)) break;
       visitadas.add(url);
-      const data: ListResponse<SKU> = (await client.get<ListResponse<SKU>>(url, { params })).data;
+      const data: ListResponse<SKU> = (await client.get<ListResponse<SKU>>(url, { params, timeout: scanTimeout })).data;
       const pagina: ListPage<SKU> = normalizeList<SKU>(data);
       const sku = pagina.items.find(item => item.codigo_barras === candidato);
-      if (sku) return detalharProduto(sku.produto);
+      if (sku) return detalharProduto(sku.produto, scanTimeout);
       url = pagina.next;
       params = undefined;
     }

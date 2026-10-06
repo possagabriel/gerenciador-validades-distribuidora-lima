@@ -15,5 +15,6 @@ export function useProduto(id: number) {
 }
 
 export function useProdutoPorCodigo(codigo: string | null) {
-  return useQuery({ queryKey: ['produto-codigo', codigo], queryFn: () => buscarCodigoBarras(codigo!), enabled: Boolean(codigo) });
+  return useQuery({ queryKey: ['produto-codigo', codigo], queryFn: () => buscarCodigoBarras(codigo!),
+    enabled: Boolean(codigo), retry: false });
 }

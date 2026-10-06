@@ -10,6 +10,7 @@ import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
+import { mensagemErro } from '../api/errors';
 import { colors, common, radius } from '../components/theme';
 
 export default function ScannerScreen(): React.JSX.Element {
@@ -93,7 +94,8 @@ export default function ScannerScreen(): React.JSX.Element {
         <Text selectable style={[common.muted, { marginTop: 6 }]}>{codigo}</Text>
       </View>
       {query.isLoading ? <LoadingState label="Buscando produto…" /> : query.isError ?
-        <ErrorState message="Não foi possível consultar este código." onRetry={() => void query.refetch()} /> : !query.data ?
+        <ErrorState message={`${mensagemErro(query.error, 'Não foi possível consultar este código.')} Verifique se o servidor está ligado e acessível pelo celular.`}
+          onRetry={() => void query.refetch()} /> : !query.data ?
           <EmptyState icon="search-outline" title="Produto não encontrado" description="O código foi lido, mas não está cadastrado. Confira os dígitos ou tente outro." /> : null}
     </View> : null}
     {aviso ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginTop: 12 }}>{aviso}</Text> : null}

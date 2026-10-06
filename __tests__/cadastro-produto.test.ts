@@ -49,14 +49,18 @@ test('cria categoria, produto e código nas rotas existentes da API', async () =
 test('busca o código exato mesmo após resultados parciais e outra página', async () => {
   const produto = { id: 9, nome: 'Suco', categoria: 3, categoria_nome: 'Bebidas', preco_venda: 12.5,
     skus: [{ id: 10, produto: 9, codigo_barras: '7891234567890' }] };
-  api.onGet('produto-skus/', { params: { search: '7891234567890' } }).reply(200, {
-    count: 2, next: 'produto-skus/?page=2&search=7891234567890',
-    results: [{ id: 11, produto: 7, codigo_barras: '0007891234567890' }],
+  api.onGet('produto-skus/', { params: { search: '7891234567890' } }).reply(config => {
+    expect(config.timeout).toBe(5000);
+    return [200, { count: 2, next: 'produto-skus/?page=2&search=7891234567890',
+      results: [{ id: 11, produto: 7, codigo_barras: '0007891234567890' }] }];
   });
   api.onGet('produto-skus/?page=2&search=7891234567890').reply(200, {
     count: 2, next: null, results: produto.skus,
   });
-  api.onGet('produtos/9/').reply(200, produto);
+  api.onGet('produtos/9/').reply(config => {
+    expect(config.timeout).toBe(5000);
+    return [200, produto];
+  });
 
   expect(await buscarCodigoBarras(' 7891234567890 ')).toEqual(produto);
 });
