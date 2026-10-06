@@ -1,8 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { buscarCodigoBarras, detalharProduto, listarProdutos } from '../api/produtos';
 
 export function useProdutos(search: string) {
-  return useQuery({ queryKey: ['produtos', search], queryFn: () => listarProdutos(search) });
+  return useInfiniteQuery({
+    queryKey: ['produtos', search],
+    initialPageParam: 'produtos/',
+    queryFn: ({ pageParam }) => listarProdutos(search, pageParam),
+    getNextPageParam: page => page.next ?? undefined,
+  });
 }
 
 export function useProduto(id: number) {

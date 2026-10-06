@@ -1,27 +1,25 @@
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { criarCategoria, criarCodigoBarras, criarProduto, listarCategorias } from '../api/produtos';
+import { criarCategoria, criarCodigoBarras, criarProduto, detalharProduto, listarCategorias } from '../api/produtos';
 import type { LoteInicial } from '../api/produtos';
 import { mensagemErro } from '../api/errors';
 import type { Categoria } from '../types/categoria';
+import type { Produto } from '../types/produto';
 import type { ProductsStackParams } from '../navigation/types';
-import { lerPreco } from '../utils/formatters';
+import { formatarData, lerPreco } from '../utils/formatters';
 import ActionButton from '../components/ActionButton';
 import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
+import BarcodeField from '../components/BarcodeField';
+import DatePickerField from '../components/DatePickerField';
+import { dateFromISO } from '../utils/calendar';
 import { colors, common, radius, spacing } from '../components/theme';
 
 type GrupoLote = { dataValidade: string; quantidade: string; custo: string };
 const novoGrupoLote = (): GrupoLote => ({ dataValidade: '', quantidade: '', custo: '' });
-
-function dataValidadeValida(valor: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
-  const data = new Date(`${valor}T00:00:00Z`);
-  return Number.isFinite(data.getTime()) && data.toISOString().slice(0, 10) === valor;
-}
 
 export default function AdicionarProdutoScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<ProductsStackParams>>();
@@ -36,7 +34,45 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
   const [criandoCategoria, setCriandoCategoria] = useState(false);
   const [salvandoCategoria, setSalvandoCategoria] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const salvandoRef = useRef(false);
   const [erro, setErro] = useState('');
+  const [produtoCriado, setProdutoCriado] = useState<Produto | null>(null);
+  const minValidade = new Date().toISOString().slice(0, 10);
+
+  const abrirProduto = (produto: Produto) => {
+    queryClient.setQueryData(['produto', produto.id], produto);
+    void queryClient.invalidateQueries({ queryKey: ['produtos'] });
+    void queryClient.invalidateQueries({ queryKey: ['lotes'] });
+    navigation.replace('ProdutoDetalhe', { id: produto.id });
+  };
+
+  const salvarCodigo = async (produto: Produto, valorCodigo: string) => {
+    try {
+      const sku = await criarCodigoBarras(produto.id, valorCodigo);
+      abrirProduto({ ...produto, skus: [...produto.skus.filter(item => item.id !== sku.id), sku] });
+    } catch (error) {
+      setProdutoCriado(produto);
+      setErro(`O produto foi criado, mas o código ainda não foi confirmado: ${mensagemErro(error, 'Tente salvar o código novamente.')}`);
+    }
+  };
+
+  const tentarSalvarCodigo = async () => {
+    if (!produtoCriado || salvandoRef.current) return;
+    const valorCodigo = codigo.trim();
+    if (!valorCodigo) { setErro('Informe o código de barras ou abra o produto para adicionar depois.'); return; }
+    salvandoRef.current = true;
+    setSalvando(true); setErro('');
+    try {
+      const atualizado = await detalharProduto(produtoCriado.id);
+      if (atualizado.skus.some(sku => sku.codigo_barras === valorCodigo)) {
+        abrirProduto(atualizado);
+        return;
+      }
+      await salvarCodigo(atualizado, valorCodigo);
+    } catch (error) {
+      setErro(mensagemErro(error, 'Não foi possível verificar o código. Tente novamente.'));
+    } finally { salvandoRef.current = false; setSalvando(false); }
+  };
 
   const salvarCategoria = async () => {
     const valor = novaCategoria.trim();
@@ -64,8 +100,8 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
     for (const [index, grupo] of gruposLote.entries()) {
       const quantidade = Number(grupo.quantidade);
       const custo = lerPreco(grupo.custo);
-      if (!dataValidadeValida(grupo.dataValidade)) {
-        setErro(`Informe uma data válida no lote ${index + 1}, no formato AAAA-MM-DD.`); return;
+      if (!dateFromISO(grupo.dataValidade) || grupo.dataValidade < minValidade) {
+        setErro(`Selecione uma validade a partir de ${formatarData(minValidade)} no lote ${index + 1}.`); return;
       }
       if (!Number.isSafeInteger(quantidade) || quantidade < 1) {
         setErro(`Informe a quantidade de unidades do lote ${index + 1}.`); return;
@@ -78,26 +114,34 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
     if (new Set(lotesIniciais.map(lote => lote.data_validade)).size !== lotesIniciais.length) {
       setErro('Use uma linha por data de validade.'); return;
     }
+    if (salvandoRef.current) return;
+    salvandoRef.current = true;
     setSalvando(true); setErro('');
     try {
-      const produto = await criarProduto({ nome: valorNome, categoria: categoriaId, preco_venda: valorPreco, lotes_iniciais: lotesIniciais });
-      let produtoSalvo = produto;
-      let aviso: string | null = null;
-      if (valorCodigo) {
-        try {
-          const sku = await criarCodigoBarras(produto.id, valorCodigo);
-          produtoSalvo = { ...produto, skus: [...produto.skus, sku] };
-        }
-        catch (error) { aviso = mensagemErro(error, 'Não foi possível salvar o código de barras.'); }
-      }
-      queryClient.setQueryData(['produto', produto.id], produtoSalvo);
+      const produto = await criarProduto({ nome: valorNome, categoria: categoriaId, preco_venda: valorPreco,
+        lotes_iniciais: lotesIniciais });
+      queryClient.setQueryData(['produto', produto.id], produto);
       void queryClient.invalidateQueries({ queryKey: ['produtos'] });
       void queryClient.invalidateQueries({ queryKey: ['lotes'] });
-      navigation.replace('ProdutoDetalhe', { id: produto.id });
-      if (aviso) Alert.alert('Produto criado', `O produto foi salvo, mas o código de barras não: ${aviso}`);
+      if (valorCodigo) await salvarCodigo(produto, valorCodigo);
+      else abrirProduto(produto);
     } catch (error) { setErro(mensagemErro(error, 'Não foi possível criar o produto.')); }
-    finally { setSalvando(false); }
+    finally { salvandoRef.current = false; setSalvando(false); }
   };
+
+  if (produtoCriado) return <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <ScrollView style={common.page} contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
+      <ScreenHeading title="Produto criado" subtitle="Confirme o código de barras para concluir o cadastro." />
+      <View style={common.card}>
+        <Text style={[common.heading, { marginBottom: 12 }]}>{produtoCriado.nome}</Text>
+        <BarcodeField label="Código de barras" value={codigo} onChangeText={setCodigo} />
+      </View>
+      {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 12 }}>{erro}</Text> : null}
+      <ActionButton label="Tentar salvar código" onPress={() => void tentarSalvarCodigo()} loading={salvando} />
+      <ActionButton label="Abrir produto e adicionar depois" variant="secondary" disabled={salvando}
+        onPress={() => abrirProduto(produtoCriado)} style={{ marginTop: 10 }} />
+    </ScrollView>
+  </KeyboardAvoidingView>;
 
   return <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScrollView style={common.page} contentContainerStyle={common.content} keyboardShouldPersistTaps="handled">
@@ -159,9 +203,8 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
             </Pressable> : null}
           </View>
           <Text style={[common.muted, { marginBottom: 6 }]}>Data de validade *</Text>
-          <TextInput accessibilityLabel={`Data de validade do lote ${index + 1}`} placeholder="AAAA-MM-DD"
-            value={grupo.dataValidade} onChangeText={value => setGruposLote(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, dataValidade: value } : item))}
-            keyboardType="numbers-and-punctuation" maxLength={10} style={[common.input, { marginBottom: 12 }]} />
+          <DatePickerField label={`Data de validade do lote ${index + 1}`} value={grupo.dataValidade} minDate={minValidade}
+            onChangeText={value => setGruposLote(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, dataValidade: value } : item))} />
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
               <Text style={[common.muted, { marginBottom: 6 }]}>Unidades *</Text>
@@ -182,8 +225,7 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
       <View style={common.card}>
         <Text style={common.heading}>Código de barras</Text>
         <Text style={[common.muted, { marginTop: 4, marginBottom: 14 }]}>Opcional. Você também pode adicionar depois.</Text>
-        <TextInput accessibilityLabel="Código de barras" placeholder="Digite o código" value={codigo}
-          onChangeText={setCodigo} autoCapitalize="none" autoCorrect={false} maxLength={50} style={common.input} />
+        <BarcodeField label="Código de barras" value={codigo} onChangeText={setCodigo} />
       </View>
 
       {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 12, fontSize: 14 }}>{erro}</Text> : null}

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +15,7 @@ import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
 import RefreshNotice from '../components/RefreshNotice';
+import BarcodeField from '../components/BarcodeField';
 import { colors, common, radius, spacing, type } from '../components/theme';
 import { formatarMoeda } from '../utils/formatters';
 
@@ -26,20 +27,23 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
   const [adicionando, setAdicionando] = useState(false);
   const [codigo, setCodigo] = useState('');
   const [salvando, setSalvando] = useState(false);
+  const salvandoRef = useRef(false);
   const [erro, setErro] = useState('');
 
   const salvarCodigo = async () => {
+    if (salvandoRef.current) return;
     const valor = codigo.trim();
     if (!valor) { setErro('Informe o código de barras.'); return; }
+    salvandoRef.current = true;
     setSalvando(true); setErro('');
     try {
       const sku = await criarCodigoBarras(params.id, valor);
       queryClient.setQueryData<Produto>(['produto', params.id], current =>
-        current ? { ...current, skus: [...current.skus, sku] } : current);
+        current ? { ...current, skus: [...current.skus.filter(item => item.id !== sku.id), sku] } : current);
       void queryClient.invalidateQueries({ queryKey: ['produtos'] });
       setCodigo(''); setAdicionando(false);
     } catch (error) { setErro(mensagemErro(error, 'Não foi possível adicionar o código.')); }
-    finally { setSalvando(false); }
+    finally { salvandoRef.current = false; setSalvando(false); }
   };
 
   if (query.isLoading) return <LoadingState />;
@@ -62,8 +66,7 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
       </Pressable>
     </View>
     {adicionando ? <View style={common.card}>
-      <TextInput accessibilityLabel="Novo código de barras" value={codigo} onChangeText={setCodigo}
-        placeholder="Digite o código" autoCapitalize="none" autoCorrect={false} maxLength={50} style={[common.input, { marginBottom: 10 }]} />
+      <BarcodeField label="Novo código de barras" value={codigo} onChangeText={setCodigo} />
       {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 10 }}>{erro}</Text> : null}
       <ActionButton label="Salvar código" onPress={() => void salvarCodigo()} loading={salvando} />
     </View> : null}
