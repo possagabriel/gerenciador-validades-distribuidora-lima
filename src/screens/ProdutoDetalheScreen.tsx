@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
-import { criarCodigoBarras } from '../api/produtos';
+import { criarCodigoBarras, excluirProduto } from '../api/produtos';
 import { mensagemErro } from '../api/errors';
 import { useProduto } from '../hooks/useProdutos';
+import { useKeyboardScroll } from '../hooks/useKeyboardScroll';
 import type { Produto } from '../types/produto';
 import type { ProductsStackParams } from '../navigation/types';
 import ActionButton from '../components/ActionButton';
@@ -22,11 +23,41 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
   const { params } = useRoute<RouteProp<ProductsStackParams, 'ProdutoDetalhe'>>();
   const navigation = useNavigation<NativeStackNavigationProp<ProductsStackParams>>();
   const queryClient = useQueryClient();
+  const { scrollRef, onInputFocus } = useKeyboardScroll();
   const query = useProduto(params.id);
   const [adicionando, setAdicionando] = useState(false);
   const [codigo, setCodigo] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState('');
+
+  const confirmarExclusao = () => Alert.alert(
+    'Excluir produto?',
+    'O produto e seus lotes sairão do catálogo. Os registros ficarão preservados para recuperação.',
+    [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Excluir', style: 'destructive', onPress: () => { void apagarProduto(); } }
+    ]
+  );
+
+  const apagarProduto = async () => {
+    if (excluindo) return;
+    setExcluindo(true); setErroExclusao('');
+    try {
+      await excluirProduto(params.id);
+      queryClient.setQueriesData<Produto[]>({ queryKey: ['produtos'] }, current =>
+        current?.filter(item => item.id !== params.id));
+      navigation.popToTop();
+      queryClient.removeQueries({ queryKey: ['produto', params.id] });
+      void queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      void queryClient.invalidateQueries({ queryKey: ['lotes'] });
+      void queryClient.invalidateQueries({ queryKey: ['relatorio'] });
+      void queryClient.invalidateQueries({ queryKey: ['descontos'] });
+      void queryClient.invalidateQueries({ queryKey: ['produto-codigo'] });
+    } catch (error) { setErroExclusao(mensagemErro(error, 'Não foi possível excluir o produto.')); }
+    finally { setExcluindo(false); }
+  };
 
   const salvarCodigo = async () => {
     const valor = codigo.trim();
@@ -45,7 +76,9 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
   if (query.isLoading) return <LoadingState />;
   if (!query.data) return <ErrorState onRetry={() => void query.refetch()} />;
   const produto = query.data;
-  return <ScrollView style={common.page} contentContainerStyle={common.content}>
+  return <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <ScrollView ref={scrollRef} style={common.page} contentContainerStyle={common.content}
+      keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
     <ScreenHeading title={produto.nome} subtitle={produto.categoria_nome} />
     {query.isError ? <RefreshNotice onRetry={() => void query.refetch()} /> : null}
     <View style={[common.card, { borderRadius: radius.feature, padding: spacing.xl }]}>
@@ -53,6 +86,11 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
       <Text style={{ color: colors.ink, fontSize: 30, fontWeight: '800', marginTop: 5 }}>{formatarMoeda(produto.preco_venda)}</Text>
       <Text style={[common.muted, { marginTop: 8 }]}>{produto.skus.length} {produto.skus.length === 1 ? 'código de barras' : 'códigos de barras'} cadastrados</Text>
     </View>
+    <ActionButton label="Editar produto" icon="create-outline" variant="secondary"
+      onPress={() => navigation.navigate('EditarProduto', { id: produto.id })} style={{ marginBottom: spacing.sm }} />
+    <ActionButton label="Excluir produto" icon="trash-outline" variant="danger"
+      onPress={confirmarExclusao} loading={excluindo} style={{ marginBottom: spacing.sm }} />
+    {erroExclusao ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: spacing.md }}>{erroExclusao}</Text> : null}
     <ActionButton label="Ver lotes deste produto" onPress={() => navigation.navigate('SkuLotes', { produtoId: produto.id })}
       variant="secondary" style={{ marginBottom: 25 }} />
     <View style={[common.row, { marginBottom: 12 }]}>
@@ -63,7 +101,7 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
     </View>
     {adicionando ? <View style={common.card}>
       <TextInput accessibilityLabel="Novo código de barras" value={codigo} onChangeText={setCodigo}
-        placeholder="Digite o código" autoCapitalize="none" autoCorrect={false} maxLength={50} style={[common.input, { marginBottom: 10 }]} />
+        onFocus={onInputFocus} placeholder="Digite o código" autoCapitalize="none" autoCorrect={false} maxLength={50} style={[common.input, { marginBottom: 10 }]} />
       {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 10 }}>{erro}</Text> : null}
       <ActionButton label="Salvar código" onPress={() => void salvarCodigo()} loading={salvando} />
     </View> : null}
@@ -77,5 +115,6 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
         <Ionicons name="chevron-forward" size={20} color={colors.muted} />
       </View>
     </Pressable>) : <EmptyState icon="barcode-outline" title="Nenhum código cadastrado" description="Adicione um código para localizar este produto pelo leitor." />}
-  </ScrollView>;
+    </ScrollView>
+  </KeyboardAvoidingView>;
 }

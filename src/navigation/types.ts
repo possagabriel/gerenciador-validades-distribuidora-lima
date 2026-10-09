@@ -5,6 +5,7 @@ export type ProductsStackParams = {
   ProdutosLista: undefined;
   AdicionarProduto: undefined;
   ProdutoDetalhe: { id: number };
+  EditarProduto: { id: number };
   SkuLotes: { produtoId: number; codigo?: string };
   LoteDetalhe: { id: number };
   Scanner: undefined;

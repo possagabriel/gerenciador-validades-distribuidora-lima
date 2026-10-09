@@ -27,17 +27,7 @@ class Command(BaseCommand):
         para_atualizar = []
 
         for lote in lotes:
-            dias_restantes = (lote.data_validade.date() - hoje).days
-            categoria = lote.produto.categoria
-
-            if dias_restantes < 0:
-                novo_nivel = Lote.NivelVencimento.VENCIDO
-            elif dias_restantes <= categoria.dias_critico:
-                novo_nivel = Lote.NivelVencimento.CRITICO
-            elif dias_restantes <= categoria.dias_atencao:
-                novo_nivel = Lote.NivelVencimento.ATENCAO
-            else:
-                novo_nivel = Lote.NivelVencimento.OK
+            novo_nivel = lote.calcular_nivel_vencimento(hoje)
 
             if lote.nivel_vencimento != novo_nivel:
                 lote.nivel_vencimento = novo_nivel

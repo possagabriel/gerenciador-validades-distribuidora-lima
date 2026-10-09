@@ -3,12 +3,14 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput,
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../hooks/useAuth';
+import { useKeyboardScroll } from '../hooks/useKeyboardScroll';
 import { mensagemErro } from '../api/errors';
 import ActionButton from '../components/ActionButton';
 import { common, colors, radius, spacing } from '../components/theme';
 
 export default function LoginScreen(): React.JSX.Element {
   const { signIn } = useAuth();
+  const { scrollRef, onInputFocus } = useKeyboardScroll();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +28,9 @@ export default function LoginScreen(): React.JSX.Element {
     } finally { setSubmitting(false); }
   };
 
-  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <ScrollView style={common.page} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 28 }} keyboardShouldPersistTaps="handled">
+  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <ScrollView ref={scrollRef} style={common.page} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 28 }}
+      keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <View style={{ width: 56, height: 56, borderRadius: radius.input, backgroundColor: colors.greenDark,
         justifyContent: 'center', alignItems: 'center', marginBottom: 22 }}>
         <Text style={{ color: colors.white, fontSize: 23, fontWeight: '800' }}>DL</Text>
@@ -40,11 +43,11 @@ export default function LoginScreen(): React.JSX.Element {
       <View style={[common.card, { padding: spacing.lg }]}>
         <Text style={[common.muted, { marginBottom: 7 }]}>Usuário</Text>
         <TextInput accessibilityLabel="Usuário" placeholder="Seu usuário" autoCapitalize="none" autoComplete="username"
-          value={username} onChangeText={setUsername} style={[common.input, { marginBottom: 18 }]} />
+          value={username} onChangeText={setUsername} onFocus={onInputFocus} style={[common.input, { marginBottom: 18 }]} />
         <Text style={[common.muted, { marginBottom: 7 }]}>Senha</Text>
         <View style={{ marginBottom: 20 }}>
           <TextInput accessibilityLabel="Senha" placeholder="Sua senha" secureTextEntry={!showPassword}
-            autoComplete="password" value={password} onChangeText={setPassword} style={[common.input, { paddingRight: 78 }]} />
+            autoComplete="password" value={password} onChangeText={setPassword} onFocus={onInputFocus} style={[common.input, { paddingRight: 78 }]} />
           <Pressable accessibilityRole="button" accessibilityLabel={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             onPress={() => setShowPassword(value => !value)} style={{ position: 'absolute', right: 6, top: 2, minWidth: 70, minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ color: colors.greenDark, fontWeight: '700' }}>{showPassword ? 'Ocultar' : 'Mostrar'}</Text>

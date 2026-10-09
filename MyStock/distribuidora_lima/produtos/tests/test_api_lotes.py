@@ -49,6 +49,42 @@ class LoteApiTestsBase(APITestCase):
 
 
 class LoteFiltrosApiTests(LoteApiTestsBase):
+    def test_criacao_pela_api_calcula_nivel_imediatamente(self):
+        response = self.client.post(
+            "/api/lotes/",
+            {
+                "produto": self.produto.pk,
+                "quantidade": 12,
+                "custo_unitario_compra": 4.5,
+                "data_validade": (timezone.now() + timedelta(days=3)).isoformat(),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["nivel_vencimento"], Lote.NivelVencimento.CRITICO)
+
+    def test_produto_pode_ser_criado_com_lote_inicial(self):
+        response = self.client.post(
+            "/api/produtos/",
+            {
+                "nome": "Leite",
+                "categoria": self.categoria.pk,
+                "preco_venda": 7.5,
+                "lote_inicial": {
+                    "quantidade": 24,
+                    "custo_unitario_compra": 5.0,
+                    "data_validade": (timezone.now() + timedelta(days=10)).isoformat(),
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        lote = Lote.objects.get(produto_id=response.data["id"])
+        self.assertEqual(lote.quantidade, 24)
+        self.assertEqual(lote.nivel_vencimento, Lote.NivelVencimento.ATENCAO)
+
     def test_filtro_por_categoria(self):
         outra_categoria = Categoria.objects.create(nome="Limpeza")
         outro_produto = Produto.objects.create(

@@ -121,6 +121,23 @@ http://<host>:<port>/api/
 | `categoria_nome` | string | sim | não | nome da categoria (read-only) |
 | `preco_venda` | float | sim | sim | valor em R$ |
 | `skus` | array | sim | não | lista de SKUs (read-only) |
+| `lote_inicial` | object | não | sim | opcional; cria o primeiro lote na mesma transação |
+
+O objeto `lote_inicial` aceita `quantidade`, `custo_unitario_compra` e `data_validade`. O nível de vencimento é calculado automaticamente na criação.
+
+**Exemplo de criação com lote inicial:**
+```json
+{
+  "nome": "Presunto Fatiado",
+  "categoria": 2,
+  "preco_venda": 19.90,
+  "lote_inicial": {
+    "quantidade": 24,
+    "custo_unitario_compra": 13.50,
+    "data_validade": "2026-12-20T12:00:00Z"
+  }
+}
+```
 
 **Filtros:**
 - `?search=` — busca por nome do produto ou código de barras dos SKUs

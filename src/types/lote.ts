@@ -7,7 +7,7 @@ export interface Lote {
   nome_lote: string;
   quantidade: number;
   custo_unitario_compra: number | string | null;
-  nivel_vencimento: NivelVencimento;
+  nivel_vencimento: NivelVencimento | null;
   esgotado: boolean;
   dias_vencido: number | null;
   data_cadastro: string;

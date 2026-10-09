@@ -31,7 +31,7 @@ class ProdutoViewSet(viewsets.ModelViewSet):
 
 
 class ProdutoSKUViewSet(viewsets.ModelViewSet):
-    queryset = ProdutoSKU.objects.select_related("produto").all()
+    queryset = ProdutoSKU.objects.select_related("produto").filter(produto__deletado_em__isnull=True)
     serializer_class = ProdutoSKUSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["codigo_barras", "produto__nome"]
@@ -43,14 +43,14 @@ class LoteViewSet(viewsets.ModelViewSet):
     GET/PUT/PATCH/DELETE /api/lotes/{id}/
     """
 
-    queryset = Lote.objects.select_related("produto", "produto__categoria").all()
+    queryset = Lote.objects.select_related("produto", "produto__categoria").filter(produto__deletado_em__isnull=True)
     serializer_class = LoteSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["nome_lote", "produto__nome"]
     ordering_fields = ["data_validade", "nivel_vencimento", "data_cadastro"]
 
     def get_queryset(self):
-        qs = Lote.objects.select_related("produto", "produto__categoria").all()
+        qs = Lote.objects.select_related("produto", "produto__categoria").filter(produto__deletado_em__isnull=True)
         params = self.request.query_params
 
         categoria_id = params.get("categoria")
@@ -127,7 +127,10 @@ class LoteViewSet(viewsets.ModelViewSet):
 
         return Response(
             {
-                "periodo": {"data_inicio": data_inicio, "data_fim": data_fim},
+                "periodo": {
+                    "data_inicio": data_inicio.isoformat() if data_inicio else None,
+                    "data_fim": data_fim.isoformat() if data_fim else None,
+                },
                 "prejuizo_total": base_qs.prejuizo_total(),
                 "quantidade_lotes_considerados": com_custo.count(),
                 "lotes_considerados": LoteSerializer(com_custo, many=True).data,
