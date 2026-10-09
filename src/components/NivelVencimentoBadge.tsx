@@ -9,8 +9,10 @@ const variants: Record<NivelVencimento, { label: string; background: string; for
   3: { label: 'Vencido', background: colors.purpleSoft, foreground: colors.purple }
 };
 
-export default function NivelVencimentoBadge({ nivel }: { nivel: NivelVencimento }): React.JSX.Element {
-  const variant = variants[nivel];
+export default function NivelVencimentoBadge({ nivel }: { nivel: NivelVencimento | null }): React.JSX.Element {
+  const variant = nivel === null
+    ? { label: 'Não classificado', background: colors.background, foreground: colors.muted }
+    : variants[nivel];
   return <View style={{ backgroundColor: variant.background, paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill }}>
     <Text style={{ color: variant.foreground, fontWeight: '700', fontSize: type.caption }}>{variant.label}</Text>
   </View>;

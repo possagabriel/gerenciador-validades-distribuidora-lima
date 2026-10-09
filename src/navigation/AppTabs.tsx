@@ -13,6 +13,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import RelatoriosScreen from '../screens/RelatoriosScreen';
 import DescontosScreen from '../screens/DescontosScreen';
 import AdicionarProdutoScreen from '../screens/AdicionarProdutoScreen';
+import EditarProdutoScreen from '../screens/EditarProdutoScreen';
 import MoreScreen from '../screens/MoreScreen';
 import type { LotesStackParams, MoreStackParams, ProductsStackParams, TabsParams } from './types';
 import { colors, type } from '../components/theme';
@@ -41,6 +42,7 @@ function ProductsNavigator(): React.JSX.Element {
     <Products.Screen name="ProdutosLista" component={ProdutosListScreen} options={({ navigation }) => ({ title: 'Distribuidora Lima', headerRight: () => <HeaderAction name="barcode-outline" label="Ler código de barras" onPress={() => navigation.navigate('Scanner')} /> })} />
     <Products.Screen name="AdicionarProduto" component={AdicionarProdutoScreen} options={{ title: 'Novo produto' }} />
     <Products.Screen name="ProdutoDetalhe" component={ProdutoDetalheScreen} options={{ title: 'Produto' }} />
+    <Products.Screen name="EditarProduto" component={EditarProdutoScreen} options={{ title: 'Editar produto' }} />
     <Products.Screen name="SkuLotes" component={LotesListScreen} options={{ title: 'Lotes do produto' }} />
     <Products.Screen name="LoteDetalhe" component={LoteDetalheScreen} options={{ title: 'Lote' }} />
     <Products.Screen name="Scanner" component={ScannerScreen} options={{ title: 'Ler código' }} />
@@ -67,6 +69,7 @@ export default function AppTabs(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   return <Tabs.Navigator screenOptions={{
     headerShown: false, tabBarActiveTintColor: colors.greenDark, tabBarInactiveTintColor: colors.muted,
+    tabBarHideOnKeyboard: true,
     tabBarStyle: { height: 66 + insets.bottom, paddingTop: 6, paddingBottom: Math.max(6, insets.bottom), borderTopColor: colors.border, backgroundColor: colors.white },
     tabBarLabelStyle: { fontSize: type.caption, fontWeight: '700' }, tabBarItemStyle: { minHeight: 48 },
     tabBarIconStyle: { marginBottom: 1 }

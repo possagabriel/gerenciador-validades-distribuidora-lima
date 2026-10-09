@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase
 
@@ -12,6 +14,7 @@ class CategoriaAdminTest(TestCase):
         self.factory = RequestFactory()
 
         self.admin = CategoriaAdmin(Categoria, self.site)
+        self.admin.message_user = Mock()
 
         self.categoria = Categoria.objects.create(
             nome="Limpeza",
@@ -23,13 +26,12 @@ class CategoriaAdminTest(TestCase):
         self.categoria.delete()
 
         # Manager padrão não enxerga registros excluídos
-        self.assertEqual(Categoria.objects.count(), 0)
+        self.assertFalse(Categoria.objects.filter(pk=self.categoria.pk).exists())
 
         request = self.factory.get("/admin/")
         queryset = self.admin.get_queryset(request)
 
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), self.categoria)
+        self.assertEqual(queryset.filter(pk=self.categoria.pk).count(), 1)
 
     def test_excluido_retorna_true_quando_soft_deletado(self):
         self.categoria.delete()

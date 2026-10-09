@@ -1,6 +1,6 @@
 import type { ExpoConfig } from 'expo/config';
 
-const apiBaseUrl = process.env.API_BASE_URL ?? '';
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL ?? '';
 const localHttp = apiBaseUrl.startsWith('http://');
 
 const config: ExpoConfig = {

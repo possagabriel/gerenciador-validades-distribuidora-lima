@@ -135,7 +135,7 @@ class LoteListView(GerenteRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = Lote.objects.select_related("produto", "produto__categoria").all()
+        qs = Lote.objects.select_related("produto", "produto__categoria").filter(produto__deletado_em__isnull=True)
 
         self.filtro_form = LoteFiltroForm(self.request.GET or None)
         if self.filtro_form.is_valid():
@@ -226,7 +226,7 @@ class PrejuizoListView(GerenteRequiredMixin, ListView):
     def get_queryset(self):
         qs = (
             Lote.objects.select_related("produto", "produto__categoria")
-            .filter(nivel_vencimento=Lote.NivelVencimento.VENCIDO, esgotado=False)
+            .filter(nivel_vencimento=Lote.NivelVencimento.VENCIDO, esgotado=False, produto__deletado_em__isnull=True)
             .annotate(valor_prejuizo=F("quantidade") * F("custo_unitario_compra"))
         )
 
@@ -307,7 +307,7 @@ class SugestaoDescontoListView(GerenteRequiredMixin, ListView):
         lotes = (
             Lote.objects.select_related("produto", "produto__categoria")
             .prefetch_related("produto__categoria__regras_desconto")
-            .filter(esgotado=False, data_validade__date__gte=hoje)
+            .filter(esgotado=False, data_validade__date__gte=hoje, produto__deletado_em__isnull=True)
         )
 
         self.filtro_form = SugestaoDescontoFiltroForm(self.request.GET or None)

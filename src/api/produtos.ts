@@ -4,7 +4,18 @@ import type { Produto } from '../types/produto';
 import type { Categoria } from '../types/categoria';
 import type { SKU } from '../types/sku';
 
-export interface NovoProduto { nome: string; categoria: number; preco_venda: number }
+export interface NovoProduto {
+  nome: string;
+  categoria: number;
+  preco_venda: number;
+  lote_inicial: {
+    quantidade: number;
+    custo_unitario_compra: number;
+    data_validade: string;
+  };
+}
+
+export type AlteracaoProduto = Pick<Produto, 'nome' | 'categoria'> & { preco_venda: number };
 
 export async function listarProdutos(search = ''): Promise<Produto[]> {
   const { data } = await client.get<ListResponse<Produto>>('produtos/', { params: search ? { search } : undefined });
@@ -29,6 +40,15 @@ export async function criarCategoria(nome: string): Promise<Categoria> {
 export async function criarProduto(produto: NovoProduto): Promise<Produto> {
   const { data } = await client.post<Produto>('produtos/', produto);
   return data;
+}
+
+export async function atualizarProduto(id: number, alteracao: AlteracaoProduto): Promise<Produto> {
+  const { data } = await client.patch<Produto>(`produtos/${id}/`, alteracao);
+  return data;
+}
+
+export async function excluirProduto(id: number): Promise<void> {
+  await client.delete(`produtos/${id}/`);
 }
 
 export async function criarCodigoBarras(produto: number, codigo_barras: string): Promise<SKU> {

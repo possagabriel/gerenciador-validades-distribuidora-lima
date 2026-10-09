@@ -16,19 +16,22 @@ import { formatarMoeda } from '../utils/formatters';
 
 export default function DashboardScreen(): React.JSX.Element {
   const navigation = useNavigation<BottomTabNavigationProp<TabsParams>>();
-  const criticos = useLotes(2);
+  const lotesQuery = useLotes();
   const relatorio = useQuery({ queryKey: ['relatorio'], queryFn: obterRelatorio });
-  const refresh = () => { void criticos.refetch(); void relatorio.refetch(); };
-  const lotes = (criticos.data ?? []).filter(item => !item.esgotado);
+  const refresh = () => { void lotesQuery.refetch(); void relatorio.refetch(); };
+  const urgentes = (lotesQuery.data ?? [])
+    .filter(item => !item.esgotado && (item.nivel_vencimento === 2 || item.nivel_vencimento === 3))
+    .sort((a, b) => (b.nivel_vencimento ?? 0) - (a.nivel_vencimento ?? 0)
+      || (a.data_validade ?? '').localeCompare(b.data_validade ?? ''));
   return <ScrollView style={common.page} contentContainerStyle={common.content}
-    refreshControl={<RefreshControl refreshing={criticos.isRefetching || relatorio.isRefetching} onRefresh={refresh} tintColor={colors.green} />}>
+    refreshControl={<RefreshControl refreshing={lotesQuery.isRefetching || relatorio.isRefetching} onRefresh={refresh} tintColor={colors.green} />}>
     <ScreenHeading title="Visão geral" subtitle="Validades que pedem atenção hoje." />
-    {((criticos.isError && Boolean(criticos.data)) || (relatorio.isError && Boolean(relatorio.data))) ?
+    {((lotesQuery.isError && Boolean(lotesQuery.data)) || (relatorio.isError && Boolean(relatorio.data))) ?
       <RefreshNotice onRetry={refresh} /> : null}
     <View style={{ backgroundColor: colors.greenDark, borderRadius: radius.feature, padding: spacing.xl, marginBottom: spacing.base }}>
-      <Text style={{ color: colors.paleInk, fontSize: type.small, fontWeight: '700' }}>Lotes críticos em estoque</Text>
-      <Text style={{ color: colors.white, fontSize: type.metric, fontWeight: '800', marginTop: spacing.xs }}>{criticos.data ? lotes.length : '—'}</Text>
-      <Text style={{ color: colors.paleInk, fontSize: type.small }}>Precisam ser conferidos</Text>
+      <Text style={{ color: colors.paleInk, fontSize: type.small, fontWeight: '700' }}>Lotes urgentes em estoque</Text>
+      <Text style={{ color: colors.white, fontSize: type.metric, fontWeight: '800', marginTop: spacing.xs }}>{lotesQuery.data ? urgentes.length : '—'}</Text>
+      <Text style={{ color: colors.paleInk, fontSize: type.small }}>Críticos ou vencidos</Text>
     </View>
     <ActionButton label="Adicionar produto" icon="add-circle-outline" onPress={() => navigation.navigate('Produtos', { screen: 'AdicionarProduto' })} style={{ marginBottom: spacing.xl }} />
     <View style={[common.row, { marginBottom: spacing.md }]}>
@@ -37,11 +40,11 @@ export default function DashboardScreen(): React.JSX.Element {
         <Text style={[common.muted, { color: colors.greenDark, fontWeight: '700' }]}>Ver lotes</Text>
       </Pressable>
     </View>
-    {!criticos.data && criticos.isPending ? <ActivityIndicator color={colors.green} style={{ marginVertical: spacing.xl }} /> :
-      !criticos.data && criticos.isError ? <ErrorState message="Não foi possível carregar os lotes críticos." onRetry={() => void criticos.refetch()} /> :
-      lotes.length ? lotes.slice(0, 3).map(lote =>
+    {!lotesQuery.data && lotesQuery.isPending ? <ActivityIndicator color={colors.green} style={{ marginVertical: spacing.xl }} /> :
+      !lotesQuery.data && lotesQuery.isError ? <ErrorState message="Não foi possível carregar os lotes urgentes." onRetry={() => void lotesQuery.refetch()} /> :
+      urgentes.length ? urgentes.slice(0, 3).map(lote =>
       <LoteCard key={lote.id} lote={lote} onPress={() => navigation.navigate('Lotes', { screen: 'LoteDetalhe', params: { id: lote.id } })} />) :
-      <EmptyState icon="checkmark-circle-outline" title="Nenhum lote crítico" description="Os lotes em estoque estão fora da faixa crítica." />}
+      <EmptyState icon="checkmark-circle-outline" title="Nenhum lote urgente" description="Não há lotes críticos ou vencidos em estoque." />}
     <View style={[common.card, { marginTop: spacing.md }]}>
       <Text style={common.muted}>Prejuízo nos últimos 30 dias</Text>
       <Text style={[common.heading, { fontSize: 24, marginTop: spacing.xs }]}>{relatorio.data ? formatarMoeda(relatorio.data.prejuizo_total) : relatorio.isError ? 'Indisponível' : 'Carregando…'}</Text>

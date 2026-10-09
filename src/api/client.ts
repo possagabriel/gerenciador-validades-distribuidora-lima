@@ -2,7 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import Constants from 'expo-constants';
 import { getTokens, replaceTokensIfCurrent, tokenExpired, type Tokens } from '../utils/storage';
 
-const configuredUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+const configuredUrl = process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl;
 export const baseURL = typeof configuredUrl === 'string' ? `${configuredUrl.replace(/\/+$/, '')}/api/` : '/api/';
 export const publicClient = axios.create({ baseURL, timeout: 15000 });
 export const client = axios.create({ baseURL, timeout: 15000 });

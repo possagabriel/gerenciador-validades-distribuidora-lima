@@ -308,6 +308,23 @@ class Lote(SoftDeleteModel):
 
         super().save(*args, **kwargs)
 
+    def calcular_nivel_vencimento(self, hoje=None):
+        """Retorna a situação atual do lote conforme os prazos da categoria."""
+        if self.esgotado or not self.data_validade:
+            return self.nivel_vencimento
+
+        hoje = hoje or timezone.now().date()
+        dias_restantes = (self.data_validade.date() - hoje).days
+        categoria = self.produto.categoria
+
+        if dias_restantes < 0:
+            return self.NivelVencimento.VENCIDO
+        if dias_restantes <= categoria.dias_critico:
+            return self.NivelVencimento.CRITICO
+        if dias_restantes <= categoria.dias_atencao:
+            return self.NivelVencimento.ATENCAO
+        return self.NivelVencimento.OK
+
     def __str__(self):
         return self.nome_lote or f"(lote não salvo, produto: {self.produto_id})"
 
