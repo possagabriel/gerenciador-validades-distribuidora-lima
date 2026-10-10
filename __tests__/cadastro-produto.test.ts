@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import { client } from '../src/api/client';
-import { atualizarProduto, criarCategoria, criarCodigoBarras, criarProduto, excluirProduto } from '../src/api/produtos';
+import { atualizarProduto, buscarCodigoBarras, criarCategoria, criarCodigoBarras, criarProduto, excluirProduto } from '../src/api/produtos';
 import { erroDataParcial, erroDataValidade, lerDataBrasileira, lerPreco, mascararData } from '../src/utils/formatters';
 import { getTokens } from '../src/utils/storage';
 
@@ -42,9 +42,9 @@ test('não aceita datas anteriores a hoje nem dias inexistentes', () => {
   expect(erroDataValidade('08/10/2026', hoje)).toBe('Informe uma data real, de hoje em diante.');
 });
 
-test('cria categoria, produto e código nas rotas reais da API', async () => {
+test('cria produto, lote e código numa requisição', async () => {
   api.onPost('categorias/').reply(config => {
-    expect(JSON.parse(config.data)).toEqual({ nome: 'Bebidas' });
+    expect(JSON.parse(config.data)).toEqual({ nome: 'Bebidas', dias_atencao: 30, dias_critico: 7 });
     return [201, { id: 3, nome: 'Bebidas', dias_atencao: 30, dias_critico: 7 }];
   });
   api.onPost('produtos/').reply(config => {
@@ -54,13 +54,12 @@ test('cria categoria, produto e código nas rotas reais da API', async () => {
         quantidade: 20,
         custo_unitario_compra: 8.75,
         data_validade: '2027-12-31T12:00:00.000Z'
-      }
+      },
+      codigo_barras: '7891234567890'
     });
-    return [201, { id: 9, nome: 'Suco', categoria: 3, categoria_nome: 'Bebidas', preco_venda: 12.5, skus: [] }];
-  });
-  api.onPost('produto-skus/').reply(config => {
-    expect(JSON.parse(config.data)).toEqual({ produto: 9, codigo_barras: '7891234567890' });
-    return [201, { id: 10, produto: 9, codigo_barras: '7891234567890' }];
+    return [201, { id: 9, nome: 'Suco', categoria: 3, categoria_nome: 'Bebidas', preco_venda: 12.5,
+      estoque_total: 20, proxima_validade: '2027-12-31T12:00:00.000Z',
+      skus: [{ id: 10, produto: 9, codigo_barras: '7891234567890' }] }];
   });
 
   const categoria = await criarCategoria('Bebidas');
@@ -70,11 +69,21 @@ test('cria categoria, produto e código nas rotas reais da API', async () => {
       quantidade: 20,
       custo_unitario_compra: 8.75,
       data_validade: '2027-12-31T12:00:00.000Z'
-    }
+    },
+    codigo_barras: '7891234567890'
   });
-  const sku = await criarCodigoBarras(produto.id, '7891234567890');
   expect(produto.id).toBe(9);
-  expect(sku.codigo_barras).toBe('7891234567890');
+  expect(produto.skus[0]?.codigo_barras).toBe('7891234567890');
+  expect(api.history.post).toHaveLength(2);
+});
+
+test('busca código exato e abre seu produto', async () => {
+  api.onGet('produto-skus/').reply(config => {
+    expect(config.params).toEqual({ codigo_barras: '7891234567890' });
+    return [200, [{ id: 10, produto: 9, codigo_barras: '7891234567890' }]];
+  });
+  api.onGet('produtos/9/').reply(200, { id: 9, nome: 'Suco', skus: [] });
+  expect((await buscarCodigoBarras('7891234567890'))?.id).toBe(9);
 });
 
 test('edita e exclui produto pelas rotas da API', async () => {

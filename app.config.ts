@@ -1,6 +1,9 @@
 import type { ExpoConfig } from 'expo/config';
 
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL ?? '';
+if (process.env.EAS_BUILD_PROFILE && !apiBaseUrl.startsWith('https://')) {
+  throw new Error('Builds EAS exigem EXPO_PUBLIC_API_BASE_URL com uma URL HTTPS acessível ao aparelho.');
+}
 const localHttp = apiBaseUrl.startsWith('http://');
 
 const config: ExpoConfig = {
@@ -19,6 +22,7 @@ const config: ExpoConfig = {
     ['expo-camera', { cameraPermission: 'Permitir a leitura de códigos de barras pela câmera.', recordAudioAndroid: false, barcodeScannerEnabled: true }],
     'expo-notifications',
     'expo-secure-store',
+    'expo-sharing',
     ['expo-build-properties', { android: { usesCleartextTraffic: localHttp } }]
   ],
   extra: { apiBaseUrl }

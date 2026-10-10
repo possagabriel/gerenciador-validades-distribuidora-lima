@@ -8,6 +8,9 @@ import ProdutosListScreen from '../screens/ProdutosListScreen';
 import ProdutoDetalheScreen from '../screens/ProdutoDetalheScreen';
 import LotesListScreen from '../screens/LotesListScreen';
 import LoteDetalheScreen from '../screens/LoteDetalheScreen';
+import LoteFormularioScreen from '../screens/LoteFormularioScreen';
+import CategoriasScreen from '../screens/CategoriasScreen';
+import LixeiraScreen from '../screens/LixeiraScreen';
 import ScannerScreen from '../screens/ScannerScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import RelatoriosScreen from '../screens/RelatoriosScreen';
@@ -45,6 +48,7 @@ function ProductsNavigator(): React.JSX.Element {
     <Products.Screen name="EditarProduto" component={EditarProdutoScreen} options={{ title: 'Editar produto' }} />
     <Products.Screen name="SkuLotes" component={LotesListScreen} options={{ title: 'Lotes do produto' }} />
     <Products.Screen name="LoteDetalhe" component={LoteDetalheScreen} options={{ title: 'Lote' }} />
+    <Products.Screen name="LoteFormulario" component={LoteFormularioScreen} options={{ title: 'Salvar lote' }} />
     <Products.Screen name="Scanner" component={ScannerScreen} options={{ title: 'Ler código' }} />
   </Products.Navigator>;
 }
@@ -53,6 +57,7 @@ function LotesNavigator(): React.JSX.Element {
   return <Lots.Navigator screenOptions={stackOptions}>
     <Lots.Screen name="LotesLista" component={LotesListScreen} options={{ title: 'Distribuidora Lima' }} />
     <Lots.Screen name="LoteDetalhe" component={LoteDetalheScreen} options={{ title: 'Lote' }} />
+    <Lots.Screen name="LoteFormulario" component={LoteFormularioScreen} options={{ title: 'Salvar lote' }} />
   </Lots.Navigator>;
 }
 
@@ -61,6 +66,8 @@ function MoreNavigator(): React.JSX.Element {
     <More.Screen name="MaisMenu" component={MoreScreen} options={{ title: 'Distribuidora Lima' }} />
     <More.Screen name="Relatorios" component={RelatoriosScreen} options={{ title: 'Relatórios' }} />
     <More.Screen name="Descontos" component={DescontosScreen} options={{ title: 'Descontos' }} />
+    <More.Screen name="Categorias" component={CategoriasScreen} options={{ title: 'Categorias' }} />
+    <More.Screen name="Lixeira" component={LixeiraScreen} options={{ title: 'Lixeira' }} />
   </More.Navigator>;
 }
 

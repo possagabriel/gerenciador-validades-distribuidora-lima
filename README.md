@@ -54,6 +54,7 @@ No Expo Go, os alertas locais ficam desativados porque o módulo de notificaçõ
 npm run typecheck
 npm test
 npx expo install --check
+DJANGO_DEBUG=1 MyStock/.venv/bin/python MyStock/distribuidora_lima/manage.py test produtos usuarios gerente --settings=mysite.test_settings
 ```
 
 ## Build de demonstração
@@ -66,10 +67,18 @@ eas build --platform android --profile demo
 eas build --platform ios --profile demo
 ```
 
-O perfil `demo` gera APK para Android. O build iOS exige conta Apple e provisionamento para distribuição interna. Configure `EXPO_PUBLIC_API_BASE_URL` no ambiente do EAS Build (por exemplo, variável de ambiente do projeto EAS) antes de gerar o binário. Após mudar permissões nativas, gere um novo build.
+O perfil `demo` gera APK para Android. O build iOS exige conta Apple e provisionamento para distribuição interna. Configure `EXPO_PUBLIC_API_BASE_URL` com a origem **HTTPS** da API no ambiente `preview` do EAS Build. O `app.config.ts` bloqueia builds EAS sem HTTPS. Após mudar permissões nativas, gere um novo build. Sem API pública estável, ainda não é possível entregar um APK que funcione longe do computador.
+
+## Segurança, produção e backups
+
+O cadastro de usuários na API exige conta Admin. Gerente pode alterar cadastros e ver relatórios; Estoquista pode criar e editar produtos e lotes; Caixa consulta o catálogo e registra saídas. As alterações de quantidade passam por `/api/lotes/{id}/movimentos/` e ficam ligadas ao usuário, data e motivo. A exclusão de produtos, categorias e lotes é lógica; a gerência pode restaurá-los pela lixeira.
+
+Para servir a API fora da rede local, configure uma máquina e um domínio próprios. Use `MyStock/production.env.example` como referência, defina uma chave secreta aleatória, execute `MyStock/run-production.sh` com Gunicorn atrás de um proxy HTTPS e configure o endereço HTTPS em `EXPO_PUBLIC_API_BASE_URL` no ambiente do build. `MyStock/deploy/Caddyfile.example` é um modelo para esse proxy. Verifique a configuração com `python manage.py check --deploy --settings=mysite.production` antes de publicar. A senha da conta local `teste` foi trocada; guarde a nova senha em um cofre antes de remover o arquivo temporário que a contém.
+
+Crie backups com `MyStock/.venv/bin/python MyStock/backup_db.py --env-file /caminho/protegido/database.env --destination /volume/externo/backups`. O comando grava um arquivo customizado do PostgreSQL, valida sua estrutura e só então o publica. Teste a restauração com `MyStock/.venv/bin/python MyStock/test_restore.py /caminho/backup.dump --env-file /caminho/protegido/database.env`; o usuário do banco precisa de permissão `CREATEDB` ou use `--docker-container` para um contêiner PostgreSQL local com acesso administrativo. Os modelos de serviço e timer em `MyStock/deploy/` agendam o backup diário às 02:00 após ajuste dos caminhos e do usuário do sistema. Neste Fedora, o timer `gerenciador-validades-backup.timer` foi corrigido e testado; seus arquivos ficam em `~/Documents/TCC/secure-backups`. Confira com `systemctl --user status gerenciador-validades-backup.service` e `systemctl --user list-timers`. Ainda é necessário copiar os backups para outro dispositivo ou serviço, pois o diretório local compartilha o disco do banco.
 
 ## Contrato da API e limites
 
-O arquivo `MyStock/EndpointsDocs.md` define as rotas usadas aqui: `/api/lotes/relatorio-prejuizo/`, `/api/lotes/sugestoes-desconto/`, `/api/produtos/`, `/api/categorias/` e `/api/produto-skus/`. A API não expõe `/api/relatorios/` nem `/api/descontos/`. Lotes referenciam `produto`, não SKU, e o campo real é `data_validade`. Por isso a tela de um SKU mostra os lotes do produto correspondente.
+O arquivo `MyStock/EndpointsDocs.md` define as rotas usadas aqui: `/api/lotes/relatorio-prejuizo/`, `/api/lotes/sugestoes-desconto/`, `/api/produtos/`, `/api/categorias/` e `/api/produto-skus/`. Também há `/api/usuarios/me/`, `/api/lotes/{id}/movimentos/`, `/api/lotes/prioridade/`, `/api/lotes/alertas/`, `/api/lotes/exportar-csv/` e as ações de lixeira/restauração. Lotes referenciam `produto`, não SKU, e o campo real é `data_validade`.
 
-O DRF atual retorna arrays sem paginação. A interface mostra 20 itens por página após buscar a lista. Se a API passar a paginar no servidor, será preciso trocar essa estratégia de consulta. Em builds próprios, alertas locais são agendados para até 50 lotes críticos não esgotados quando o app abre e quando volta ao primeiro plano; não há push nem execução periódica em segundo plano. O script `MyStock/start-api.sh` recalcula os níveis ao iniciar a API. O app usa a API para autenticação, produtos, categorias, códigos de barras e lotes.
+Produtos e lotes retornam páginas de 20 itens com `count`, `next`, `previous` e `results`; o app consulta uma página por vez. Em builds próprios, o app consulta até 50 lotes elegíveis e agenda alertas locais conforme o prazo crítico da categoria ao abrir ou voltar ao primeiro plano. Um lote novo ou alterado enquanto o app está fechado só entra na agenda quando o app abrir novamente; ainda não há push nem execução periódica em segundo plano. Os alertas precisam ser verificados em um Android real. O script `MyStock/start-api.sh` recalcula os níveis ao iniciar a API.

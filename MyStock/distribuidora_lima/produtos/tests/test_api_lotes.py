@@ -135,10 +135,11 @@ class LoteFiltrosApiTests(LoteApiTestsBase):
         self.assertIn(lote_junho.id, ids)
         self.assertNotIn(lote_julho.id, ids)
 
-    def test_filtro_com_valor_invalido_e_ignorado_sem_quebrar(self):
+    def test_filtro_com_valor_invalido_retorna_erro_claro(self):
         self._criar_lote()
         response = self.client.get("/api/lotes/", {"ano": "não-é-um-ano", "nivel_vencimento": "abc"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("nivel_vencimento", response.data)
 
     def test_filtros_sao_combinaveis(self):
         lote_certo = self._criar_lote(nivel=Lote.NivelVencimento.CRITICO, esgotado=False)

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { detalharLote, listarLotes } from '../api/lotes';
+import { detalharLote, paginaLotes } from '../api/lotes';
 import type { NivelVencimento } from '../types/lote';
 
-export function useLotes(nivel?: NivelVencimento) {
-  return useQuery({ queryKey: ['lotes', nivel ?? 'todos'], queryFn: () => listarLotes(nivel) });
+export function useLotes(nivel?: NivelVencimento, page = 1, produtoId?: number, esgotado?: boolean) {
+  return useQuery({ queryKey: ['lotes', nivel ?? 'todos', page, produtoId ?? 'todos', esgotado ?? 'todos'], queryFn: () => paginaLotes(nivel, page, produtoId, esgotado) });
 }
 
 export function useLote(id: number) {

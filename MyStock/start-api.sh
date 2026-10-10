@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/distribuidora_lima"
-../.venv/bin/python manage.py calcular_nivel_vencimento
-exec ../.venv/bin/python manage.py runserver 0.0.0.0:8000
+export DJANGO_DEBUG=1
+VENV_PYTHON="$(cd .. && pwd)/.venv/bin/python"
+"$VENV_PYTHON" manage.py calcular_nivel_vencimento
+exec "$VENV_PYTHON" manage.py runserver 0.0.0.0:8000
