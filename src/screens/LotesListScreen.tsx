@@ -45,8 +45,9 @@ export default function LotesListScreen(): React.JSX.Element {
     {podeEditarEstoque(perfil.data?.tipo_funcionario) ? <View style={{ marginBottom: spacing.md }}>
       <ActionButton label="Adicionar lote" onPress={() => navigation.navigate('LoteFormulario', { produtoId })} />
     </View> : null}
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 16 }}
-      contentContainerStyle={{ gap: 8, paddingRight: 20 }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}
+      style={{ height: 56, flexGrow: 0, flexShrink: 0, marginBottom: 8 }}
+      contentContainerStyle={{ alignItems: 'center', gap: 8, paddingRight: 20 }}>
       {filters.map(filter => <Pressable key={filter.label} accessibilityRole="button" accessibilityState={{ selected: nivel === filter.value }}
         onPress={() => { setNivel(filter.value); setPage(1); }}
         style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.base, borderRadius: radius.pill, borderWidth: 1, opacity: pressed ? 0.7 : 1,
@@ -55,8 +56,10 @@ export default function LotesListScreen(): React.JSX.Element {
         <Text style={{ color: nivel === filter.value ? colors.white : colors.muted, fontWeight: '700' }}>{filter.label}</Text>
       </Pressable>)}
     </ScrollView>
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, marginBottom: 12 }} contentContainerStyle={{ gap: 8, paddingRight: 20 }}>
-      {([['Todos', undefined], ['Disponíveis', false], ['Esgotados', true]] as const).map(([label, valor]) => <Pressable key={label}
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}
+      style={{ height: 52, flexGrow: 0, flexShrink: 0, marginBottom: 12 }}
+      contentContainerStyle={{ alignItems: 'center', gap: 8, paddingRight: 20 }}>
+      {([['Qualquer estoque', undefined], ['Disponíveis', false], ['Esgotados', true]] as const).map(([label, valor]) => <Pressable key={label}
         accessibilityRole="button" accessibilityState={{ selected: esgotado === valor }} onPress={() => { setEsgotado(valor); setPage(1); }}
         style={{ minHeight: 40, justifyContent: 'center', paddingHorizontal: spacing.base, borderRadius: radius.pill, borderWidth: 1,
           borderColor: esgotado === valor ? colors.green : colors.border }}>
