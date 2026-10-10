@@ -374,3 +374,26 @@ class Lote(SoftDeleteModel):
         if not regra:
             return None
         return round(self.produto.preco_venda * (1 - regra.percentual / 100), 2)
+
+
+class MovimentoEstoque(models.Model):
+    class Tipo(models.TextChoices):
+        ENTRADA = "ENTRADA", "Entrada"
+        SAIDA = "SAIDA", "Saída"
+        AJUSTE = "AJUSTE", "Ajuste"
+
+    lote = models.ForeignKey(Lote, on_delete=models.PROTECT, related_name="movimentos")
+    usuario = models.ForeignKey("usuarios.Usuario", on_delete=models.PROTECT, related_name="movimentos_estoque")
+    tipo = models.CharField(max_length=10, choices=Tipo.choices)
+    quantidade = models.PositiveIntegerField(help_text="Unidades movimentadas; em ajustes, saldo final desejado.")
+    quantidade_antes = models.PositiveIntegerField()
+    quantidade_depois = models.PositiveIntegerField()
+    motivo = models.CharField(max_length=255)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "movimentos_estoque"
+        ordering = ["-criado_em", "-id"]
+
+    def __str__(self):
+        return f"{self.tipo} {self.lote.nome_lote}: {self.quantidade_antes} → {self.quantidade_depois}"

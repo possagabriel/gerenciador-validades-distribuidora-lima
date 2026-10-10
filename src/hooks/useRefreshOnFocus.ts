@@ -4,10 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 
 const MAX_AGE_MS = 90_000;
 
-export function useRefreshOnFocus(scope: string, parameter?: string | number): void {
+export function useRefreshOnFocus(scope: string, parameter?: string | number | boolean | (string | number | boolean)[]): void {
   const queryClient = useQueryClient();
   useFocusEffect(useCallback(() => {
-    const queryKey = parameter === undefined ? [scope] : [scope, parameter];
+    const queryKey = parameter === undefined ? [scope] : [scope, ...(Array.isArray(parameter) ? parameter : [parameter])];
     const state = queryClient.getQueryState(queryKey);
     if (state && (state.isInvalidated || state.status === 'error' ||
       (state.dataUpdatedAt > 0 && Date.now() - state.dataUpdatedAt > MAX_AGE_MS))) {

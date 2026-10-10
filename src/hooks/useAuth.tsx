@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type PropsWithChildren 
 import { login, logout, restoreSession } from '../api/auth';
 import { subscribeSession } from '../api/client';
 import { AppState } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextValue {
   authenticated: boolean;
@@ -13,6 +14,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren): React.JSX.Element {
+  const queryClient = useQueryClient();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +25,10 @@ export function AuthProvider({ children }: PropsWithChildren): React.JSX.Element
       const currentSync = ++latestSync;
       try {
         const valid = await restoreSession();
-        if (active && currentSync === latestSync) setAuthenticated(valid);
+        if (active && currentSync === latestSync) {
+          setAuthenticated(valid);
+          if (!valid) queryClient.clear();
+        }
       } catch {
         if (active && currentSync === latestSync) setAuthenticated(false);
       } finally {
@@ -36,9 +41,17 @@ export function AuthProvider({ children }: PropsWithChildren): React.JSX.Element
     const timer = setInterval(() => { if (AppState.currentState === 'active') void sync(); }, 60_000);
     void sync();
     return () => { active = false; unsubscribe(); appState.remove(); clearInterval(timer); };
-  }, []);
+  }, [queryClient]);
 
-  return <AuthContext.Provider value={{ authenticated, loading, signIn: login, signOut: logout }}>{children}</AuthContext.Provider>;
+  const signIn = async (username: string, password: string) => {
+    queryClient.clear();
+    await login(username, password);
+  };
+  const signOut = async () => {
+    await logout();
+    queryClient.clear();
+  };
+  return <AuthContext.Provider value={{ authenticated, loading, signIn, signOut }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {

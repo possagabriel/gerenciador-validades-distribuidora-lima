@@ -1,0 +1,10 @@
+[Unit]
+Description=Agenda backup diário do Gerenciador de Validades
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=validades-backup.service
+
+[Install]
+WantedBy=timers.target

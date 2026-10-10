@@ -1,0 +1,8 @@
+api.seudominio.com.br {
+    encode gzip
+    handle_path /static/* {
+        root * /opt/validades/MyStock/distribuidora_lima/staticfiles
+        file_server
+    }
+    reverse_proxy 127.0.0.1:8000
+}

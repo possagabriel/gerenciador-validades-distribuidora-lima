@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { criarCodigoBarras, excluirProduto } from '../api/produtos';
 import { mensagemErro } from '../api/errors';
 import { useProduto } from '../hooks/useProdutos';
+import { podeEditarEstoque, podeGerenciar, usePerfil } from '../hooks/usePerfil';
 import { useKeyboardScroll } from '../hooks/useKeyboardScroll';
 import type { Produto } from '../types/produto';
 import type { ProductsStackParams } from '../navigation/types';
@@ -25,6 +26,7 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
   const queryClient = useQueryClient();
   const { scrollRef, onInputFocus } = useKeyboardScroll();
   const query = useProduto(params.id);
+  const perfil = usePerfil();
   const [adicionando, setAdicionando] = useState(false);
   const [codigo, setCodigo] = useState('');
   const [salvando, setSalvando] = useState(false);
@@ -46,12 +48,12 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
     setExcluindo(true); setErroExclusao('');
     try {
       await excluirProduto(params.id);
-      queryClient.setQueriesData<Produto[]>({ queryKey: ['produtos'] }, current =>
-        current?.filter(item => item.id !== params.id));
       navigation.popToTop();
       queryClient.removeQueries({ queryKey: ['produto', params.id] });
       void queryClient.invalidateQueries({ queryKey: ['produtos'] });
       void queryClient.invalidateQueries({ queryKey: ['lotes'] });
+      void queryClient.invalidateQueries({ queryKey: ['prioridade'] });
+      void queryClient.invalidateQueries({ queryKey: ['alertas'] });
       void queryClient.invalidateQueries({ queryKey: ['relatorio'] });
       void queryClient.invalidateQueries({ queryKey: ['descontos'] });
       void queryClient.invalidateQueries({ queryKey: ['produto-codigo'] });
@@ -86,18 +88,21 @@ export default function ProdutoDetalheScreen(): React.JSX.Element {
       <Text style={{ color: colors.ink, fontSize: 30, fontWeight: '800', marginTop: 5 }}>{formatarMoeda(produto.preco_venda)}</Text>
       <Text style={[common.muted, { marginTop: 8 }]}>{produto.skus.length} {produto.skus.length === 1 ? 'código de barras' : 'códigos de barras'} cadastrados</Text>
     </View>
-    <ActionButton label="Editar produto" icon="create-outline" variant="secondary"
+    {podeEditarEstoque(perfil.data?.tipo_funcionario) ? <ActionButton label="Editar produto" icon="create-outline" variant="secondary"
       onPress={() => navigation.navigate('EditarProduto', { id: produto.id })} style={{ marginBottom: spacing.sm }} />
-    <ActionButton label="Excluir produto" icon="trash-outline" variant="danger"
-      onPress={confirmarExclusao} loading={excluindo} style={{ marginBottom: spacing.sm }} />
+      : null}
+    {podeGerenciar(perfil.data?.tipo_funcionario) ? <ActionButton label="Excluir produto" icon="trash-outline" variant="danger"
+      onPress={confirmarExclusao} loading={excluindo} style={{ marginBottom: spacing.sm }} /> : null}
     {erroExclusao ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: spacing.md }}>{erroExclusao}</Text> : null}
     <ActionButton label="Ver lotes deste produto" onPress={() => navigation.navigate('SkuLotes', { produtoId: produto.id })}
       variant="secondary" style={{ marginBottom: 25 }} />
+    {podeEditarEstoque(perfil.data?.tipo_funcionario) ? <ActionButton label="Adicionar lote" variant="secondary"
+      onPress={() => navigation.navigate('LoteFormulario', { produtoId: produto.id })} style={{ marginBottom: spacing.md }} /> : null}
     <View style={[common.row, { marginBottom: 12 }]}>
       <Text style={common.heading}>Códigos de barras</Text>
-      <Pressable accessibilityRole="button" onPress={() => { setAdicionando(value => !value); setErro(''); }} style={{ minHeight: 44, justifyContent: 'center' }}>
+      {podeEditarEstoque(perfil.data?.tipo_funcionario) ? <Pressable accessibilityRole="button" onPress={() => { setAdicionando(value => !value); setErro(''); }} style={{ minHeight: 44, justifyContent: 'center' }}>
         <Text style={{ color: colors.greenDark, fontWeight: '700' }}>{adicionando ? 'Cancelar' : 'Adicionar'}</Text>
-      </Pressable>
+      </Pressable> : null}
     </View>
     {adicionando ? <View style={common.card}>
       <TextInput accessibilityLabel="Novo código de barras" value={codigo} onChangeText={setCodigo}

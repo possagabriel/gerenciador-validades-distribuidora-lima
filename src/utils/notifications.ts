@@ -22,9 +22,10 @@ function getNotifications(): Promise<typeof import('expo-notifications')> | null
 export function dataAlerta(lote: Lote, now = new Date()): Date | null {
   const validade = validadeDoLote(lote);
   if (!validade || validade <= now) return null;
-  // O lote já está crítico: avisar em breve, mantendo a notificação antes da validade.
-  const trigger = new Date(now.getTime() + 60_000);
-  return trigger < validade ? trigger : null;
+  const inicioCritico = new Date(validade.getTime() - (lote.dias_critico ?? 7) * 86_400_000);
+  if (inicioCritico > now) return inicioCritico;
+  const imediato = new Date(now.getTime() + 60_000);
+  return imediato < validade ? imediato : null;
 }
 
 export async function agendarAlertasCriticos(lotes: Lote[]): Promise<void> {
@@ -41,7 +42,7 @@ export async function agendarAlertasCriticos(lotes: Lote[]): Promise<void> {
 
   // Reconciliar apenas alertas deste app evita duplicatas após reabrir ou refazer a consulta.
   await cancelarAlertasCriticos();
-  for (const lote of lotes.filter(item => item.nivel_vencimento === 2 && !item.esgotado).slice(0, 50)) {
+  for (const lote of lotes.filter(item => !item.esgotado).slice(0, 50)) {
     const date = dataAlerta(lote);
     if (!date) continue;
     await notifications.scheduleNotificationAsync({

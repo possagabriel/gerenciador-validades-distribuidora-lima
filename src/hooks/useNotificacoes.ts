@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { listarLotes } from '../api/lotes';
+import Constants, { AppOwnership } from 'expo-constants';
+import { obterAlertas } from '../api/lotes';
 import { agendarAlertasCriticos } from '../utils/notifications';
 
 export function useNotificacoes(): void {
-  const query = useQuery({ queryKey: ['lotes', 2], queryFn: () => listarLotes(2), staleTime: 5 * 60_000 });
+  const query = useQuery({ queryKey: ['alertas'], queryFn: obterAlertas, staleTime: 5 * 60_000,
+    enabled: Constants.appOwnership !== AppOwnership.Expo });
   useEffect(() => {
     if (query.data) void agendarAlertasCriticos(query.data).catch(() => undefined);
   }, [query.data]);

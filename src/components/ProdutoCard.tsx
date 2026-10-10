@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { Produto } from '../types/produto';
-import { formatarMoeda } from '../utils/formatters';
+import { formatarData, formatarMoeda } from '../utils/formatters';
 import { colors, common, radius } from './theme';
 
 export default function ProdutoCard({ produto, onPress }: { produto: Produto; onPress: () => void }): React.JSX.Element {
@@ -17,5 +17,8 @@ export default function ProdutoCard({ produto, onPress }: { produto: Produto; on
       <Ionicons name="chevron-forward" size={20} color={colors.muted} />
     </View>
     <Text style={{ color: colors.greenDark, fontSize: 18, fontWeight: '800', marginTop: 10, marginLeft: 56 }}>{formatarMoeda(produto.preco_venda)}</Text>
+    <Text style={[common.muted, { marginTop: 4, marginLeft: 56 }]}>
+      Estoque: {produto.estoque_total ?? 0} · Próxima validade: {produto.proxima_validade ? formatarData(produto.proxima_validade) : 'sem lote disponível'}
+    </Text>
   </Pressable>;
 }

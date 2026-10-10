@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { buscarCodigoBarras, detalharProduto, listarProdutos } from '../api/produtos';
+import { buscarCodigoBarras, detalharProduto, paginaProdutos } from '../api/produtos';
 
-export function useProdutos(search: string) {
-  return useQuery({ queryKey: ['produtos', search], queryFn: () => listarProdutos(search) });
+export function useProdutos(search: string, page = 1) {
+  return useQuery({ queryKey: ['produtos', search, page], queryFn: () => paginaProdutos(search, page) });
 }
 
 export function useProduto(id: number) {

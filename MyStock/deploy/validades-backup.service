@@ -1,0 +1,8 @@
+[Unit]
+Description=Backup diário do banco do Gerenciador de Validades
+
+[Service]
+Type=oneshot
+User=validades
+Environment=BACKUP_DIR=/srv/validades-backups
+ExecStart=/opt/validades/MyStock/.venv/bin/python /opt/validades/MyStock/backup_db.py --env-file /etc/validades/database.env
