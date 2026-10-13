@@ -47,4 +47,9 @@ describe('contratos de leitura', () => {
     expect(trigger?.getTime()).toBeGreaterThan(now.getTime());
     expect(trigger?.getTime()).toBeLessThan(new Date(lote.data_validade!).getTime());
   });
+
+  test('agenda aviso para o início da faixa crítica mesmo com app fechado', () => {
+    const futuro = { ...lote, data_validade: '2026-11-20T12:00:00Z', dias_critico: 7 };
+    expect(dataAlerta(futuro, new Date('2026-10-01T12:00:00Z'))?.toISOString()).toBe('2026-11-13T12:00:00.000Z');
+  });
 });

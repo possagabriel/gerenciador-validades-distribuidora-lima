@@ -4,6 +4,7 @@ export interface Lote {
   id: number;
   produto: number;
   produto_nome: string;
+  dias_critico?: number;
   nome_lote: string;
   quantidade: number;
   custo_unitario_compra: number | string | null;

@@ -7,4 +7,6 @@ export interface Produto {
   categoria_nome: string;
   preco_venda: number | string;
   skus: SKU[];
+  estoque_total: number;
+  proxima_validade: string | null;
 }

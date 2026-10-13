@@ -37,10 +37,10 @@ function Formulario({ produto }: { produto: Produto }): React.JSX.Element {
     try {
       const atualizado = await atualizarProduto(produto.id, { nome: valorNome, categoria: categoriaId, preco_venda: valorPreco });
       queryClient.setQueryData(['produto', produto.id], atualizado);
-      queryClient.setQueriesData<Produto[]>({ queryKey: ['produtos'] }, current =>
-        current?.map(item => item.id === produto.id ? atualizado : item));
       void queryClient.invalidateQueries({ queryKey: ['produtos'] });
       void queryClient.invalidateQueries({ queryKey: ['lotes'] });
+      void queryClient.invalidateQueries({ queryKey: ['prioridade'] });
+      void queryClient.invalidateQueries({ queryKey: ['alertas'] });
       void queryClient.invalidateQueries({ queryKey: ['relatorio'] });
       void queryClient.invalidateQueries({ queryKey: ['descontos'] });
       navigation.goBack();

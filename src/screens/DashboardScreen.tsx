@@ -3,7 +3,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useQuery } from '@tanstack/react-query';
 import { obterRelatorio } from '../api/relatorios';
-import { useLotes } from '../hooks/useLotes';
+import { obterPrioridade } from '../api/lotes';
+import { podeEditarEstoque, podeGerenciar, usePerfil } from '../hooks/usePerfil';
 import type { TabsParams } from '../navigation/types';
 import ActionButton from '../components/ActionButton';
 import EmptyState from '../components/EmptyState';
@@ -16,13 +17,12 @@ import { formatarMoeda } from '../utils/formatters';
 
 export default function DashboardScreen(): React.JSX.Element {
   const navigation = useNavigation<BottomTabNavigationProp<TabsParams>>();
-  const lotesQuery = useLotes();
-  const relatorio = useQuery({ queryKey: ['relatorio'], queryFn: obterRelatorio });
-  const refresh = () => { void lotesQuery.refetch(); void relatorio.refetch(); };
-  const urgentes = (lotesQuery.data ?? [])
-    .filter(item => !item.esgotado && (item.nivel_vencimento === 2 || item.nivel_vencimento === 3))
-    .sort((a, b) => (b.nivel_vencimento ?? 0) - (a.nivel_vencimento ?? 0)
-      || (a.data_validade ?? '').localeCompare(b.data_validade ?? ''));
+  const lotesQuery = useQuery({ queryKey: ['prioridade'], queryFn: obterPrioridade });
+  const perfil = usePerfil();
+  const gerencia = podeGerenciar(perfil.data?.tipo_funcionario);
+  const relatorio = useQuery({ queryKey: ['relatorio'], queryFn: obterRelatorio, enabled: gerencia });
+  const refresh = () => { void lotesQuery.refetch(); if (gerencia) void relatorio.refetch(); };
+  const urgentes = lotesQuery.data?.results ?? [];
   return <ScrollView style={common.page} contentContainerStyle={common.content}
     refreshControl={<RefreshControl refreshing={lotesQuery.isRefetching || relatorio.isRefetching} onRefresh={refresh} tintColor={colors.green} />}>
     <ScreenHeading title="Visão geral" subtitle="Validades que pedem atenção hoje." />
@@ -30,10 +30,10 @@ export default function DashboardScreen(): React.JSX.Element {
       <RefreshNotice onRetry={refresh} /> : null}
     <View style={{ backgroundColor: colors.greenDark, borderRadius: radius.feature, padding: spacing.xl, marginBottom: spacing.base }}>
       <Text style={{ color: colors.paleInk, fontSize: type.small, fontWeight: '700' }}>Lotes urgentes em estoque</Text>
-      <Text style={{ color: colors.white, fontSize: type.metric, fontWeight: '800', marginTop: spacing.xs }}>{lotesQuery.data ? urgentes.length : '—'}</Text>
+      <Text style={{ color: colors.white, fontSize: type.metric, fontWeight: '800', marginTop: spacing.xs }}>{lotesQuery.data ? lotesQuery.data.count : '—'}</Text>
       <Text style={{ color: colors.paleInk, fontSize: type.small }}>Críticos ou vencidos</Text>
     </View>
-    <ActionButton label="Adicionar produto" icon="add-circle-outline" onPress={() => navigation.navigate('Produtos', { screen: 'AdicionarProduto' })} style={{ marginBottom: spacing.xl }} />
+    {podeEditarEstoque(perfil.data?.tipo_funcionario) ? <ActionButton label="Adicionar produto" icon="add-circle-outline" onPress={() => navigation.navigate('Produtos', { screen: 'AdicionarProduto' })} style={{ marginBottom: spacing.xl }} /> : null}
     <View style={[common.row, { marginBottom: spacing.md }]}>
       <Text style={common.heading}>Prioridade do dia</Text>
       <Pressable accessibilityRole="button" onPress={() => navigation.navigate('Lotes', { screen: 'LotesLista' })} style={{ minHeight: 44, justifyContent: 'center' }}>
@@ -45,10 +45,10 @@ export default function DashboardScreen(): React.JSX.Element {
       urgentes.length ? urgentes.slice(0, 3).map(lote =>
       <LoteCard key={lote.id} lote={lote} onPress={() => navigation.navigate('Lotes', { screen: 'LoteDetalhe', params: { id: lote.id } })} />) :
       <EmptyState icon="checkmark-circle-outline" title="Nenhum lote urgente" description="Não há lotes críticos ou vencidos em estoque." />}
-    <View style={[common.card, { marginTop: spacing.md }]}>
+    {gerencia ? <View style={[common.card, { marginTop: spacing.md }]}>
       <Text style={common.muted}>Prejuízo nos últimos 30 dias</Text>
       <Text style={[common.heading, { fontSize: 24, marginTop: spacing.xs }]}>{relatorio.data ? formatarMoeda(relatorio.data.prejuizo_total) : relatorio.isError ? 'Indisponível' : 'Carregando…'}</Text>
       {!relatorio.data && relatorio.isError ? <ActionButton label="Tentar novamente" variant="quiet" onPress={() => void relatorio.refetch()} style={{ marginTop: spacing.sm }} /> : null}
-    </View>
+    </View> : null}
   </ScrollView>;
 }

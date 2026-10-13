@@ -3,8 +3,9 @@
   "build": {
     "demo": {
       "distribution": "internal",
+      "environment": "preview",
       "android": { "buildType": "apk" }
     },
-    "production": { "autoIncrement": true }
+    "production": { "autoIncrement": true, "environment": "production" }
   }
 }

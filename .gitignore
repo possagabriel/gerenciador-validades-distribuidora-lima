@@ -13,5 +13,7 @@ coverage/
 *.log
 *.apk
 /mobile/android/
+MyStock/backups/
+MyStock/staticfiles/
 MyStock/
 MyStock.tar.gz

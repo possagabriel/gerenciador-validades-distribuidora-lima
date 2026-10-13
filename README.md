@@ -14,7 +14,7 @@ App de gestão em React Native, Expo SDK 57 e TypeScript. Este repositório cont
 cp .env.example .env
 ```
 
-Edite `EXPO_PUBLIC_API_BASE_URL` com a origem da API, **sem** `/api` no fim. Exemplo: `EXPO_PUBLIC_API_BASE_URL=http://192.168.1.10:8000`. Em emulador Android, o host da máquina costuma ser `http://10.0.2.2:8000`; em simulador iOS, `http://localhost:8000`. `127.0.0.1` no celular aponta para o próprio celular. O Expo incorpora essa variável no código do app; depois de alterá-la, recarregue o app no Expo Go ou gere um novo build. Para demonstração fora da rede local, use uma origem HTTPS acessível ao aparelho.
+Edite `EXPO_PUBLIC_API_BASE_URL` com a origem da API, **sem** `/api` no fim. Exemplo: `EXPO_PUBLIC_API_BASE_URL=http://192.168.1.10:8000`. Em emulador Android, o host da máquina costuma ser `http://10.0.2.2:8000`; em simulador iOS, `http://localhost:8000`. `127.0.0.1` no celular aponta para o próprio celular. O Expo incorpora essa variável no código do app; depois de alterá-la, recarregue o app no Expo Go ou gere um novo build. Para usar o app fora da rede local, configure uma origem HTTPS acessível ao aparelho.
 
 ## Executar
 
@@ -29,7 +29,7 @@ Abra o QR code no Expo Go. O comando padrão usa a rede local; conecte o aparelh
 
 O login usa as credenciais existentes da API. Os JWTs são persistidos no SecureStore e reutilizados em memória durante a sessão. Uma falha temporária da rede na renovação não apaga a conta; um refresh expirado ou recusado pela API encerra a sessão.
 
-O app usa quatro abas: **Início**, **Produtos**, **Lotes** e **Mais**. Na tela **Produtos**, toque em **Adicionar produto** para cadastrar nome, categoria, preço e o lote inicial com validade, quantidade e custo. É possível criar uma categoria no próprio formulário e adicionar um código de barras opcional. O detalhe do produto também permite adicionar códigos depois. **Relatórios** e **Descontos** ficam em **Mais**. O mapa e os tokens visuais estão em [DESIGN.md](DESIGN.md).
+O app usa quatro abas: **Início**, **Produtos**, **Lotes** e **Mais**. Na tela **Produtos**, toque em **Adicionar produto** para cadastrar nome, categoria, preço e lote inicial. É possível criar uma categoria no próprio formulário e adicionar um código de barras opcional. **Relatórios** e **Descontos** ficam em **Mais**. O mapa e os tokens visuais estão em [DESIGN.md](DESIGN.md).
 
 A busca aguarda 300 ms após a digitação antes de consultar a API. Ao voltar a uma lista ou análise, dados recentes são reutilizados; depois de 90 segundos, a tela atualiza. Puxe para atualizar a qualquer momento. Se a atualização falhar, os últimos dados disponíveis continuam visíveis com uma opção de tentar novamente.
 
@@ -53,10 +53,10 @@ eas build --platform android --profile demo
 eas build --platform ios --profile demo
 ```
 
-O perfil `demo` gera APK para Android. O build iOS exige conta Apple e provisionamento para distribuição interna. Configure `EXPO_PUBLIC_API_BASE_URL` no ambiente do EAS Build antes de gerar o binário. Após mudar permissões nativas, gere um novo build.
+O perfil `demo` gera APK para Android. O build iOS exige conta Apple e provisionamento para distribuição interna. Configure `EXPO_PUBLIC_API_BASE_URL` com a origem **HTTPS** da API no ambiente `preview` do EAS Build. O `app.config.ts` bloqueia builds EAS sem HTTPS. Após mudar permissões nativas, gere um novo build. Sem API pública estável, um APK não funciona longe do computador.
 
 ## Contrato da API e limites
 
-A API precisa oferecer autenticação JWT e as rotas `/api/produtos/`, `/api/categorias/`, `/api/produto-skus/`, `/api/lotes/`, `/api/lotes/relatorio-prejuizo/` e `/api/lotes/sugestoes-desconto/`. Lotes referenciam `produto`, não SKU, e o campo real é `data_validade`. Por isso a tela de um SKU mostra os lotes do produto correspondente.
+A API precisa oferecer autenticação JWT e as rotas `/api/usuarios/me/`, `/api/produtos/`, `/api/categorias/`, `/api/produto-skus/`, `/api/lotes/`, `/api/lotes/{id}/movimentos/`, `/api/lotes/prioridade/`, `/api/lotes/alertas/`, `/api/lotes/relatorio-prejuizo/`, `/api/lotes/sugestoes-desconto/` e `/api/lotes/exportar-csv/`, além das ações de lixeira e restauração. Produtos e lotes retornam páginas de 20 itens com `count`, `next`, `previous` e `results`; o app consulta uma página por vez.
 
-O DRF atual retorna arrays sem paginação. A interface mostra 20 itens por página após buscar a lista. Se a API passar a paginar no servidor, será preciso trocar essa estratégia de consulta. Em builds próprios, alertas locais são agendados para até 50 lotes críticos não esgotados quando o app abre e quando volta ao primeiro plano; não há push nem execução periódica em segundo plano.
+Em builds próprios, o app consulta até 50 lotes elegíveis e agenda alertas locais conforme o prazo crítico da categoria ao abrir ou voltar ao primeiro plano. Um lote novo ou alterado enquanto o app está fechado só entra na agenda quando o app abrir novamente; ainda não há push nem execução periódica em segundo plano. Os alertas precisam ser verificados em um Android real.
