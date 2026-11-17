@@ -13,9 +13,10 @@
 | Início | Visão geral, lotes críticos e atalho de cadastro | Lote, Novo produto |
 | Produtos | Lista e busca | Novo produto, detalhe, códigos, lotes do produto, leitor |
 | Lotes | Lista com filtros | Detalhe do lote |
-| Mais | Menu | Relatórios, Descontos, sair |
+| Descontos (gerência) | Sugestões por lote e categoria | Consulta dos preços sugeridos |
+| Mais | Menu | Relatórios, Categorias, Lixeira, sair |
 
-A navegação principal usa quatro abas. As telas internas usam a pilha nativa para voltar. O leitor fica no cabeçalho de Produtos; o botão de adicionar fica perto do polegar. Listas e análises aceitam puxar para atualizar.
+A navegação principal usa quatro abas, mais a aba Descontos para a gerência. As telas internas usam a pilha nativa para voltar. O leitor de QR e código de barras fica visível em Produtos e nos campos de cadastro de códigos; o botão de adicionar fica perto do polegar. Listas e análises aceitam puxar para atualizar.
 
 ## Tema
 
@@ -29,7 +30,7 @@ Os valores ficam em `src/components/theme.ts`: verde `#176B50` como cor primári
 - Produto: consultar preço, códigos e lotes.
 - Lotes: filtrar e abrir um lote.
 - Lote: consultar validade, estoque e custo.
-- Leitor: localizar um produto pelo código de barras.
+- Leitor: localizar ou iniciar o cadastro de um produto pelo QR ou código de barras.
 - Relatórios: consultar prejuízo no período.
-- Descontos: consultar sugestões calculadas pela API.
+- Descontos: consultar sugestões calculadas pela API e explicar quando ainda não há regras configuradas.
 - Mais: reunir consultas secundárias e saída da conta.

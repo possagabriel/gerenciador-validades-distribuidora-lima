@@ -26,3 +26,11 @@ export interface SugestoesDesconto {
   quantidade: number;
   sugestoes: SugestaoDesconto[];
 }
+
+export interface RegraDesconto {
+  id: number;
+  categoria: number;
+  categoria_nome: string;
+  percentual: number;
+  dias_para_vencimento: number;
+}

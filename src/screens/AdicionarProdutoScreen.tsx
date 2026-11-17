@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { criarCategoria, criarProduto, listarCategorias } from '../api/produtos';
@@ -12,6 +12,7 @@ import type { ProductsStackParams } from '../navigation/types';
 import { lerPreco } from '../utils/formatters';
 import { dateToISO } from '../utils/calendar';
 import ActionButton from '../components/ActionButton';
+import CodeScannerModal from '../components/CodeScannerModal';
 import DatePickerField from '../components/DatePickerField';
 import ErrorState from '../components/ErrorState';
 import ScreenHeading from '../components/ScreenHeading';
@@ -19,6 +20,7 @@ import { colors, common, radius, spacing } from '../components/theme';
 
 export default function AdicionarProdutoScreen(): React.JSX.Element {
   const navigation = useNavigation<NativeStackNavigationProp<ProductsStackParams>>();
+  const route = useRoute<RouteProp<ProductsStackParams, 'AdicionarProduto'>>();
   const queryClient = useQueryClient();
   const { scrollRef, onInputFocus } = useKeyboardScroll();
   const categorias = useQuery({ queryKey: ['categorias'], queryFn: listarCategorias });
@@ -30,7 +32,8 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
   const [erroValidade, setErroValidade] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [custo, setCusto] = useState('');
-  const [codigo, setCodigo] = useState('');
+  const [codigo, setCodigo] = useState(route.params?.codigoInicial ?? '');
+  const [cameraAberta, setCameraAberta] = useState(false);
   const [novaCategoria, setNovaCategoria] = useState('');
   const [criandoCategoria, setCriandoCategoria] = useState(false);
   const [salvandoCategoria, setSalvandoCategoria] = useState(false);
@@ -78,7 +81,7 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
     if (!valorValidade) { setErroValidade('Selecione uma validade de hoje em diante.'); falhaCampo('validade', 'Selecione uma validade de hoje em diante.'); return; }
     if (!Number.isInteger(valorQuantidade) || valorQuantidade <= 0) { falhaCampo('quantidade', 'Informe uma quantidade maior que zero.', quantidadeRef); return; }
     if (valorCusto === null) { falhaCampo('custo', 'Informe um custo por unidade válido, como 12,50.', custoRef); return; }
-    if (valorCodigo.length > 50) { falhaCampo('codigo', 'O código de barras deve ter até 50 caracteres.', codigoRef); return; }
+    if (valorCodigo.length > 50) { falhaCampo('codigo', 'O código deve ter até 50 caracteres.', codigoRef); return; }
     setSalvando(true); setErro(''); setErrosCampos({});
     try {
       const produto = await criarProduto({
@@ -170,15 +173,19 @@ export default function AdicionarProdutoScreen(): React.JSX.Element {
       </View>
 
       <View style={common.card}>
-        <Text style={common.heading}>Código de barras</Text>
-        <Text style={[common.muted, { marginTop: 4, marginBottom: 14 }]}>Opcional. Você também pode adicionar depois.</Text>
-        <TextInput ref={codigoRef} accessibilityLabel="Código de barras" placeholder="Digite o código" value={codigo}
+        <Text style={common.heading}>QR ou código de barras</Text>
+        <Text style={[common.muted, { marginTop: 4, marginBottom: 14 }]}>Opcional. Leia com a câmera ou digite um código curto.</Text>
+        <TextInput ref={codigoRef} accessibilityLabel="QR ou código de barras" placeholder="Digite o código" value={codigo}
           onChangeText={value => { setCodigo(value); limparCampo('codigo'); }} onFocus={onInputFocus} autoCapitalize="none" autoCorrect={false} maxLength={50} style={common.input} />
         {errosCampos.codigo ? <Text accessibilityRole="alert" style={{ color: colors.danger }}>{errosCampos.codigo}</Text> : null}
+        <ActionButton label="Ler com câmera" icon="camera-outline" variant="secondary" style={{ marginTop: spacing.md }}
+          onPress={() => setCameraAberta(true)} />
       </View>
 
       {erro ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginBottom: 12, fontSize: 14 }}>{erro}</Text> : null}
       <ActionButton label="Salvar produto" onPress={() => void salvarProduto()} loading={salvando} disabled={categorias.isLoading || categorias.isError} icon="checkmark-outline" />
     </ScrollView>
+    <CodeScannerModal visible={cameraAberta} onClose={() => setCameraAberta(false)}
+      onCode={value => { setCodigo(value); limparCampo('codigo'); }} />
   </KeyboardAvoidingView>;
 }

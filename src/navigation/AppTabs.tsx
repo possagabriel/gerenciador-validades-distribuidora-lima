@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNotificacoes } from '../hooks/useNotificacoes';
+import { podeGerenciar, usePerfil } from '../hooks/usePerfil';
 import ProdutosListScreen from '../screens/ProdutosListScreen';
 import ProdutoDetalheScreen from '../screens/ProdutoDetalheScreen';
 import LotesListScreen from '../screens/LotesListScreen';
@@ -42,7 +43,7 @@ function HeaderAction({ name, label, onPress }: { name: keyof typeof Ionicons.gl
 
 function ProductsNavigator(): React.JSX.Element {
   return <Products.Navigator screenOptions={stackOptions}>
-    <Products.Screen name="ProdutosLista" component={ProdutosListScreen} options={({ navigation }) => ({ title: 'Distribuidora Lima', headerRight: () => <HeaderAction name="barcode-outline" label="Ler código de barras" onPress={() => navigation.navigate('Scanner')} /> })} />
+    <Products.Screen name="ProdutosLista" component={ProdutosListScreen} options={({ navigation }) => ({ title: 'Distribuidora Lima', headerRight: () => <HeaderAction name="scan-outline" label="Ler QR ou código de barras" onPress={() => navigation.navigate('Scanner')} /> })} />
     <Products.Screen name="AdicionarProduto" component={AdicionarProdutoScreen} options={{ title: 'Novo produto' }} />
     <Products.Screen name="ProdutoDetalhe" component={ProdutoDetalheScreen} options={{ title: 'Produto' }} />
     <Products.Screen name="EditarProduto" component={EditarProdutoScreen} options={{ title: 'Editar produto' }} />
@@ -65,7 +66,6 @@ function MoreNavigator(): React.JSX.Element {
   return <More.Navigator screenOptions={stackOptions}>
     <More.Screen name="MaisMenu" component={MoreScreen} options={{ title: 'Distribuidora Lima' }} />
     <More.Screen name="Relatorios" component={RelatoriosScreen} options={{ title: 'Relatórios' }} />
-    <More.Screen name="Descontos" component={DescontosScreen} options={{ title: 'Descontos' }} />
     <More.Screen name="Categorias" component={CategoriasScreen} options={{ title: 'Categorias' }} />
     <More.Screen name="Lixeira" component={LixeiraScreen} options={{ title: 'Lixeira' }} />
   </More.Navigator>;
@@ -73,6 +73,7 @@ function MoreNavigator(): React.JSX.Element {
 
 export default function AppTabs(): React.JSX.Element {
   useNotificacoes();
+  const perfil = usePerfil();
   const insets = useSafeAreaInsets();
   return <Tabs.Navigator screenOptions={{
     headerShown: false, tabBarActiveTintColor: colors.greenDark, tabBarInactiveTintColor: colors.muted,
@@ -81,9 +82,11 @@ export default function AppTabs(): React.JSX.Element {
     tabBarLabelStyle: { fontSize: type.caption, fontWeight: '700' }, tabBarItemStyle: { minHeight: 48 },
     tabBarIconStyle: { marginBottom: 1 }
   }}>
-    <Tabs.Screen name="Inicio" component={DashboardScreen} options={{ title: 'Distribuidora Lima', headerShown: true, headerStyle: { backgroundColor: colors.white }, headerTitleStyle: { color: colors.greenDark, fontSize: type.section, fontWeight: '700' }, tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'home' : 'home-outline'} size={23} color={color} /> }} />
+    <Tabs.Screen name="Inicio" component={DashboardScreen} options={{ title: 'Distribuidora Lima', tabBarLabel: 'Início', headerShown: true, headerStyle: { backgroundColor: colors.white }, headerTitleStyle: { color: colors.greenDark, fontSize: type.section, fontWeight: '700' }, tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'home' : 'home-outline'} size={23} color={color} /> }} />
     <Tabs.Screen name="Produtos" component={ProductsNavigator} options={{ tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'cube' : 'cube-outline'} size={23} color={color} /> }} />
     <Tabs.Screen name="Lotes" component={LotesNavigator} options={{ tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={23} color={color} /> }} />
+    {podeGerenciar(perfil.data?.tipo_funcionario) ? <Tabs.Screen name="Descontos" component={DescontosScreen}
+      options={{ tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'pricetag' : 'pricetag-outline'} size={23} color={color} /> }} /> : null}
     <Tabs.Screen name="Mais" component={MoreNavigator} options={{ tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'menu' : 'menu-outline'} size={23} color={color} /> }} />
   </Tabs.Navigator>;
 }

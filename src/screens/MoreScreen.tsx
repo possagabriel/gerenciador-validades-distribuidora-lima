@@ -29,7 +29,6 @@ export default function MoreScreen(): React.JSX.Element {
     <Text style={[common.eyebrow, { marginBottom: spacing.md }]}>Análises</Text>
     {gerencia ? <>
       <MenuRow icon="stats-chart-outline" title="Relatórios" description="Prejuízo e lotes considerados" onPress={() => navigation.navigate('Relatorios')} />
-      <MenuRow icon="pricetag-outline" title="Descontos" description="Sugestões para lotes em estoque" onPress={() => navigation.navigate('Descontos')} />
       <MenuRow icon="albums-outline" title="Categorias" description="Nomes e prazos de vencimento" onPress={() => navigation.navigate('Categorias')} />
       <MenuRow icon="trash-outline" title="Lixeira" description="Restaurar produtos, lotes e categorias" onPress={() => navigation.navigate('Lixeira')} />
     </> : null}

@@ -56,7 +56,7 @@ export default function CategoriasScreen(): React.JSX.Element {
   const excluir = (categoria: Categoria) => Alert.alert('Excluir categoria?', `Excluir ${categoria.nome}?`, [
     { text: 'Cancelar', style: 'cancel' },
     { text: 'Excluir', style: 'destructive', onPress: () => { void (async () => {
-      try { await excluirCategoria(categoria.id); await queryClient.invalidateQueries({ queryKey: ['categorias'] }); if (editando === categoria.id) selecionar(); }
+      try { await excluirCategoria(categoria.id); await queryClient.invalidateQueries({ queryKey: ['categorias'] }); void queryClient.invalidateQueries({ queryKey: ['lixeira'] }); if (editando === categoria.id) selecionar(); }
       catch (error) { setErros({ geral: mensagemErro(error, 'Não foi possível excluir a categoria.') }); }
     })(); } }
   ]);

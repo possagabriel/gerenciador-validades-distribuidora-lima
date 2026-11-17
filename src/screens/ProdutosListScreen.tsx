@@ -40,6 +40,8 @@ export default function ProdutosListScreen(): React.JSX.Element {
         placeholder="Buscar por nome ou código" placeholderTextColor={colors.muted} returnKeyType="search" style={[common.input, { paddingLeft: 43 }]} />
       <Ionicons name="search-outline" size={22} color={colors.muted} style={{ position: 'absolute', left: 14, top: 13 }} />
     </View>
+    <ActionButton label="Ler QR ou código de barras" icon="camera-outline" variant="secondary"
+      onPress={() => navigation.navigate('Scanner')} style={{ marginBottom: spacing.md }} />
     {query.data && query.isError ? <RefreshNotice onRetry={() => void query.refetch()} /> : null}
     {query.isLoading ? <LoadingState /> : query.isError && !query.data ? <ErrorState onRetry={() => void query.refetch()} /> :
       <FlatList data={visible} keyExtractor={item => String(item.id)} refreshing={query.isRefetching} onRefresh={() => void query.refetch()}

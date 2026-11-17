@@ -29,7 +29,7 @@ Abra o QR code no Expo Go. O comando padrão usa a rede local; conecte o aparelh
 
 O login usa as credenciais existentes da API. Os JWTs são persistidos no SecureStore e reutilizados em memória durante a sessão. Uma falha temporária da rede na renovação não apaga a conta; um refresh expirado ou recusado pela API encerra a sessão.
 
-O app usa quatro abas: **Início**, **Produtos**, **Lotes** e **Mais**. Na tela **Produtos**, toque em **Adicionar produto** para cadastrar nome, categoria, preço e lote inicial. É possível criar uma categoria no próprio formulário e adicionar um código de barras opcional. **Relatórios** e **Descontos** ficam em **Mais**. O mapa e os tokens visuais estão em [DESIGN.md](DESIGN.md).
+O app tem as abas **Início**, **Produtos**, **Lotes** e **Mais**. As contas de gerência também têm a aba **Descontos**. Em **Produtos**, toque em **Adicionar produto** para informar nome, categoria, preço e o primeiro lote, com validade, quantidade e custo. O código de barras é opcional e pode ser digitado ou lido com a câmera. O detalhe do produto permite consultar o preço e associar outros códigos ao cadastro. Para os perfis com permissão, **Mais** reúne os relatórios e a lixeira. O mapa de telas e os estilos estão em [DESIGN.md](DESIGN.md).
 
 A busca aguarda 300 ms após a digitação antes de consultar a API. Ao voltar a uma lista ou análise, dados recentes são reutilizados; depois de 90 segundos, a tela atualiza. Puxe para atualizar a qualquer momento. Se a atualização falhar, os últimos dados disponíveis continuam visíveis com uma opção de tentar novamente.
 

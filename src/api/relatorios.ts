@@ -1,5 +1,5 @@
 import { client } from './client';
-import type { RelatorioPrejuizo, SugestoesDesconto } from '../types/relatorio';
+import type { RegraDesconto, RelatorioPrejuizo, SugestoesDesconto } from '../types/relatorio';
 
 export async function obterRelatorio(): Promise<RelatorioPrejuizo> {
   const { data } = await client.get<RelatorioPrejuizo>('lotes/relatorio-prejuizo/');
@@ -25,4 +25,8 @@ export async function exportarCsvLotes(filtros: FiltrosRelatorio): Promise<strin
 export async function obterDescontos(): Promise<SugestoesDesconto> {
   const { data } = await client.get<SugestoesDesconto>('lotes/sugestoes-desconto/');
   return data;
+}
+
+export async function obterRegrasDesconto(): Promise<RegraDesconto[]> {
+  return (await client.get<RegraDesconto[]>('regras-desconto/')).data;
 }

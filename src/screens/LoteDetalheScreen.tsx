@@ -42,6 +42,8 @@ export default function LoteDetalheScreen(): React.JSX.Element {
         void queryClient.invalidateQueries({ queryKey: ['prioridade'] });
         void queryClient.invalidateQueries({ queryKey: ['alertas'] });
         void queryClient.invalidateQueries({ queryKey: ['produtos'] });
+        void queryClient.invalidateQueries({ queryKey: ['lixeira'] });
+        void queryClient.invalidateQueries({ queryKey: ['descontos'] });
         navigation.goBack();
       } catch (error) { setErro(mensagemErro(error, 'Não foi possível excluir o lote.')); }
     })(); } }
