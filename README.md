@@ -45,9 +45,9 @@ npm run test:coverage
 npx expo install --check
 ```
 
-Na execução de 19/11/2026, os 111 testes passaram em 13 suítes. A cobertura
-global foi de 91,93% das linhas, 88,99% das instruções, 84,22% das funções
-e 83,28% das ramificações. A medição abrange `src/**/*.ts` e `src/**/*.tsx`,
+Na execução de 19/11/2026, os 115 testes passaram em 14 suítes. A cobertura
+global foi de 93,05% das linhas, 90,13% das instruções, 86,09% das funções
+e 83,96% das ramificações. A medição abrange `src/**/*.ts` e `src/**/*.tsx`,
 com exclusão de `src/types`. O comando `npm run test:coverage` exige pelo
 menos 80% nas quatro métricas. O [relatório de testes](docs/relatorio-testes.txt)
 registra as contagens, os cenários e a saída da execução.

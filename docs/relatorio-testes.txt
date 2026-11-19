@@ -1,6 +1,182 @@
 Relatório consolidado de execução e cobertura dos testes automatizados
 Gerenciador de Validades
 
+Resultado da suíte móvel — 19/11/2026
+Passaram 115 testes em 14 suítes, em 37,988 s, sem falhas.
+A verificação TypeScript terminou sem erros.
+
+Cobertura global
+  Linhas         911/979 (93,05%)
+  Instruções     1.106/1.227 (90,13%)
+  Funções        322/374 (86,09%)
+  Ramificações   859/1.023 (83,96%)
+
+A cobertura de linhas passou de 91,93% na execução anterior para 93,05%.
+O escopo permaneceu src/**/*.ts e src/**/*.tsx, excluindo src/types, com
+as mesmas 979 linhas. O comando npm run test:coverage exige no mínimo 80%
+nas quatro métricas globais.
+
+Foram acrescentados testes da consulta e do agendamento dos alertas, da
+atualização ao retornar ao primeiro plano com dados antigos, da manutenção
+dos dados recentes e remoção do listener, e de falha no agendamento. A API,
+o estado do aplicativo e o agendamento nativo foram simulados. Os resultados
+não comprovam a entrega de notificações em um aparelho Android.
+
+Ambiente: Node.js 24.22.0, Jest 29.7.0, jest-expo 57.0.5 e
+react-test-renderer 19.2.3. Os testes foram executados em cópia isolada do
+aplicativo local, com o código de produção de src correspondente ao commit
+público f63b701. Os testes e este relatório acompanham o repositório público.
+Para repetir: npm ci; npm run typecheck; npm run test:coverage.
+
+Saída da execução atual
+
+> gerenciador-validades-mobile@1.0.0 test:coverage
+> jest --runInBand --coverage --coverageDirectory=../../work/mobile_cobertura_93 --json --outputFile=../../work/mobile_jest_93.json
+
+PASS __tests__/produtos-telas.test.jsx (19.917 s)
+PASS __tests__/componentes-telas.test.jsx
+PASS __tests__/gestao-telas.test.jsx
+PASS __tests__/fluxos-app.test.jsx (10.251 s)
+PASS __tests__/lotes-telas.test.jsx
+PASS __tests__/sessao-interface.test.jsx
+PASS __tests__/cadastro-produto.test.ts
+PASS __tests__/auth.test.ts
+PASS __tests__/domain.test.ts
+PASS __tests__/storage-cache.test.ts
+PASS __tests__/errors.test.ts
+PASS __tests__/notifications-expo-go.test.ts
+PASS __tests__/calendar.test.ts
+PASS __tests__/alertas-app.test.jsx
+
+Test Suites: 14 passed, 14 total
+Tests:       115 passed, 115 total
+Snapshots:   0 total
+Time:        37.988 s
+Ran all test suites.
+Test results written to: ../mobile_jest_93.json
+
+Títulos dos testes aprovados
+1. cadastra produto e lote inicial com código "7891234567895"
+2. cadastra produto e lote inicial com código ""
+3. valida os campos do novo produto antes de enviar à API
+4. mantém o formulário preenchido quando o servidor recusa o cadastro
+5. cria uma categoria dentro do cadastro e seleciona a nova categoria
+6. exibe a falha de criação de categoria e permite cancelar
+7. recupera a lista de categorias após uma falha
+8. altera o nome, a categoria e o preço preservando o produto no cache
+9. valida nome e preço durante a edição e apresenta falha do servidor
+10. impede salvar uma categoria que deixou de existir
+11. adiciona código ao produto e abre as rotas de estoque
+12. informa código duplicado e permite fechar o formulário de código
+13. confirma exclusão de produto com resposta HTTP 204
+14. confirma exclusão de produto com resposta HTTP 500
+15. permite ao Caixa consultar produto sem botões de edição e exclusão
+16. busca produtos com espera de digitação e abre o detalhe
+17. distingue catálogo vazio de busca sem resultados
+18. valida login, alterna visibilidade da senha e envia credenciais
+19. mostra mensagem de login para erro HTTP 401
+20. mostra mensagem de login para erro HTTP 503
+21. abre opções gerenciais e encerra a sessão
+22. limita as opções da conta ao perfil Caixa
+23. aguarda a leitura da permissão da câmera
+24. solicita acesso à câmera com canAskAgain=true
+25. solicita acesso à câmera com canAskAgain=false
+26. ignora código vazio, bloqueia leituras duplicadas e controla lanterna
+27. rejeita códigos longos e permite tentar outro código
+28. fecha o modal depois de repassar o código lido
+29. encontra produto pelo código lido e abre seu detalhe
+30. oferece cadastro quando o código não está associado e permite nova leitura
+31. permite refazer busca de código após erro da API
+32. calendário respeita a data mínima, navega entre meses e retorna a data escolhida
+33. cancelar o calendário preserva a seleção existente
+34. paginação avança e retorna com os limites corretos
+35. revela o último campo focado e cancela a assinatura do teclado ao desmontar
+36. valida nome e prazos da categoria antes de criar
+37. cria categoria com prazos e limpa o formulário após confirmação
+38. edita categoria existente e permite cancelar uma edição seguinte
+39. exibe o erro do servidor ao salvar categoria
+40. exclusão de categoria depende da confirmação e trata HTTP 204
+41. exclusão de categoria depende da confirmação e trata HTTP 400
+42. Caixa consulta prazos sem controles de gestão
+43. refaz a consulta de categorias após erro inicial
+44. exibe a lixeira vazia e permite atualizar
+45. restaura categoria e remove o registro da lixeira após a confirmação da API
+46. restaura produto e remove o registro da lixeira após a confirmação da API
+47. restaura lote e remove o registro da lixeira após a confirmação da API
+48. conserva o registro excluído quando a restauração é recusada
+49. repete consultas da lixeira após uma falha inicial
+50. mantém dados anteriores da lixeira quando uma atualização falha
+51. consulta prejuízo e envia filtros de datas, categoria e produto
+52. exporta o CSV e aciona o compartilhamento com o tipo correto
+53. informa quando o aparelho não oferece compartilhamento
+54. mostra relatório sem lotes e recupera consulta após falha inicial
+55. mostra lotes prioritários e abre a lista pelo botão da tela inicial
+56. consulta o nível crítico e deixa de exibir o lote vencido ao aplicar o filtro
+57. mostra o preço original e o sugerido e filtra as sugestões por categoria
+58. não exibe a aba Descontos para o perfil Caixa após consultar o perfil
+59. permite repetir a consulta de lotes prioritários após falha da API
+60. valida produto, quantidade, custo e validade no cadastro de lote
+61. busca e seleciona produto e cria lote com data e valores normalizados
+62. mantém os dados do lote depois de um erro de cadastro
+63. edita somente o custo preservando a validade de um lote vencido
+64. envia a nova validade ao editar o lote
+65. recarrega o formulário de edição após uma falha inicial
+66. registra ENTRADA e mostra o novo saldo e o histórico
+67. registra SAIDA e mostra o novo saldo e o histórico
+68. registra AJUSTE e mostra o novo saldo e o histórico
+69. valida quantidade e motivo, trata saída recusada e mantém saldo anterior
+70. marca o lote como esgotado com ajuste para saldo zero
+71. Caixa pode registrar saída e não recebe ações de ajuste ou exclusão
+72. abre a edição do lote pelo detalhe
+73. exclui lote somente depois de confirmar e trata HTTP 204
+74. exclui lote somente depois de confirmar e trata HTTP 500
+75. restaura uma sessão válida ao montar o provedor
+76. ausência de sessão limpa as consultas e termina a restauração
+77. erro de leitura de credenciais encerra o estado de carregamento
+78. login salva as credenciais, atualiza a sessão e limpa dados da conta anterior
+79. logout apaga credenciais e dados consultados
+80. retorno ao primeiro plano e evento de sessão revalidam autenticação
+81. uma restauração antiga não substitui a sessão mais recente
+82. remove assinatura e intervalo de sessão ao desmontar
+83. navegador raiz apresenta login e cancela alertas quando a sessão termina
+84. entrada principal do aplicativo restaura a sessão e abre área autenticada
+85. interpreta preço em reais sem perder centavos
+86. formata e valida a data de validade brasileira
+87. bloqueia dia e mês impossíveis durante a digitação
+88. não aceita datas anteriores a hoje nem dias inexistentes
+89. cria produto, lote e código numa requisição
+90. busca código exato e abre seu produto
+91. edita e exclui produto pelas rotas da API
+92. 401 renova, salva refresh rotacionado e repete GET com novo Bearer
+93. refresh vencido limpa sessão e emite evento
+94. falha de rede na renovação mantém a sessão para nova tentativa
+95. erro temporário do servidor não apaga as credenciais
+96. refresh recusado pela API encerra somente a sessão atual
+97. renovação pendente não restaura sessão após logout
+98. contratos de leitura aceita lista simples do DRF atual
+99. contratos de leitura aceita resposta paginada futura
+100. contratos de leitura volta para página válida quando a lista diminui
+101. contratos de leitura calcula dias pela data de validade real
+102. contratos de leitura conta dias de calendário em UTC como a API
+103. contratos de leitura usa cadastro mais tempo de vencimento como alternativa
+104. contratos de leitura alerta crítico ocorre em horário futuro e antes de vencer
+105. contratos de leitura agenda aviso para o início da faixa crítica mesmo com app fechado
+106. reutiliza a sessão em memória e a atualiza após entrar ou sair
+107. traduz nomes de campos e junta mensagens da API
+108. não mostra HTML de erro do servidor no formulário
+109. abre no Expo Go sem carregar expo-notifications
+110. converte apenas datas reais sem deslocar o dia
+111. monta o mês começando na segunda-feira
+112. consulta a API e encaminha os lotes recebidos para o agendamento
+113. atualiza alertas antigos ao retornar para o primeiro plano
+114. não atualiza dados recentes e remove o observador ao desmontar
+115. trata uma falha no agendamento sem interromper a consulta
+
+Histórico da execução anterior (111 testes)
+
+Relatório consolidado de execução e cobertura dos testes automatizados
+Gerenciador de Validades
+
 Resultado final da suíte móvel — 19/11/2026
 Passaram 111 testes em 13 suítes, em 61,114 s, sem falhas ou testes
 ignorados. A verificação TypeScript terminou sem erros.
