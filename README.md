@@ -38,10 +38,24 @@ No Expo Go, os alertas locais ficam desativados porque o módulo de notificaçõ
 ## Verificação
 
 ```bash
+npm ci
 npm run typecheck
 npm test
+npm run test:coverage
 npx expo install --check
 ```
+
+Na execução de 19/11/2026, os 111 testes passaram em 13 suítes. A cobertura
+global foi de 91,93% das linhas, 88,99% das instruções, 84,22% das funções
+e 83,28% das ramificações. A medição abrange `src/**/*.ts` e `src/**/*.tsx`,
+com exclusão de `src/types`. O comando `npm run test:coverage` exige pelo
+menos 80% nas quatro métricas. O [relatório de testes](docs/relatorio-testes.txt)
+registra as contagens, os cenários e a saída da execução.
+
+Os testes de interface usam respostas simuladas da API e dos recursos
+nativos. A suíte de fluxo monta a navegação do aplicativo. Câmera,
+compartilhamento e notificações precisam de verificação no aparelho para
+avaliar o comportamento nativo.
 
 ## Build de demonstração
 

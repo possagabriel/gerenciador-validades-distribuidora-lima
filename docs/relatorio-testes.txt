@@ -1,0 +1,479 @@
+Relatório consolidado de execução e cobertura dos testes automatizados
+Gerenciador de Validades
+
+Resultado final da suíte móvel — 19/11/2026
+Passaram 111 testes em 13 suítes, em 61,114 s, sem falhas ou testes
+ignorados. A verificação TypeScript terminou sem erros.
+
+Cobertura global
+  Linhas         900/979 (91,93%)
+  Instruções     1.092/1.227 (88,99%)
+  Funções        315/374 (84,22%)
+  Ramificações   852/1.023 (83,28%)
+
+A cobertura de linhas passou de 18,99% na execução inicial para 29,82%
+na suíte de 32 testes e chegou a 91,93% na suíte atual. O escopo permaneceu
+src/**/*.ts e src/**/*.tsx, excluindo apenas src/types. As 979 linhas
+consideradas são as mesmas das medições anteriores. O comando
+npm run test:coverage exige pelo menos 80% nas quatro métricas globais.
+
+Fluxos verificados
+Tela inicial e filtro de lotes críticos, preços sugeridos e filtro por
+categoria, cadastro e edição de produtos com lote inicial, validação de
+campos, cadastro de categorias, edição de custo e validade dos lotes,
+entrada, saída e correção de saldo, esgotamento, histórico, permissões,
+confirmação de exclusão, restauração pela lixeira, relatório de prejuízo,
+exportação CSV, login, restauração e encerramento de sessão, calendário,
+paginação, busca por código, permissões da câmera e recuperação após
+falhas da API. Os títulos dos 111 testes aparecem ao fim desta execução.
+
+Ambiente e alcance da execução
+Node.js 24.22.0, Jest 29.7.0, jest-expo 57.0.5 e react-test-renderer 19.2.3.
+A execução usa o código de produção do aplicativo correspondente ao
+commit público f63b701. A igualdade dos arquivos de src com o aplicativo
+local gerenciador-validades-expo foi conferida por comparação direta.
+Os testes foram executados em uma cópia isolada desse aplicativo.
+Os arquivos de teste, a configuração e este relatório acompanham o código
+no repositório público. A revisão é identificada no histórico de commits
+e no artigo. O comando npm run test:coverage repete a medição.
+
+Os componentes, estados, consultas e validações usam o código do app.
+O teste de fluxo monta AppTabs com React Navigation e React Query.
+Os testes isolados de telas substituem as chamadas de navegação por
+observadores. Respostas HTTP e recursos nativos, como câmera, teclado,
+armazenamento e compartilhamento, são simulados. A execução não envolve
+um aparelho Android nem uma API externa. A entrega de notificações em
+aparelho permanece pendente.
+
+Backend Django — resultado preservado de 17/11/2026
+Na revisão local 11a9e08 passaram 99 testes. O pytest-cov mediu
+1.007/1.224 linhas (82,27%) e 162/254 ramificações (63,78%), com SQLite
+em memória e mysite.test_settings. A saída original segue no histórico.
+
+Reprodução a partir do repositório público
+  git clone https://github.com/possagabriel/gerenciador-validades-distribuidora-lima.git
+  cd gerenciador-validades-distribuidora-lima
+  npm ci
+  npm run typecheck
+  npm run test:coverage
+
+Cobertura por arquivo
+Arquivo | Linhas | Instruções | Funções | Ramificações
+App.tsx | 100,00% | 100,00% | 100,00% | 100,00%
+api/auth.ts | 85,71% | 82,35% | 100,00% | 62,50%
+api/client.ts | 97,61% | 92,30% | 100,00% | 85,71%
+api/errors.ts | 94,44% | 87,50% | 100,00% | 77,41%
+api/lotes.ts | 81,25% | 81,25% | 83,33% | 44,44%
+api/pagination.ts | 100,00% | 100,00% | 100,00% | 100,00%
+api/produtos.ts | 100,00% | 100,00% | 100,00% | 77,77%
+api/relatorios.ts | 85,71% | 85,71% | 80,00% | 100,00%
+components/ActionButton.tsx | 100,00% | 100,00% | 100,00% | 91,66%
+components/CodeCamera.tsx | 100,00% | 100,00% | 100,00% | 100,00%
+components/CodeScannerModal.tsx | 100,00% | 100,00% | 100,00% | 100,00%
+components/DatePickerField.tsx | 93,54% | 94,11% | 84,61% | 88,88%
+components/EmptyState.tsx | 100,00% | 100,00% | 100,00% | 85,71%
+components/ErrorState.tsx | 100,00% | 100,00% | 100,00% | 66,66%
+components/LoadingState.tsx | 100,00% | 100,00% | 100,00% | 100,00%
+components/LoteCard.tsx | 100,00% | 100,00% | 100,00% | 66,66%
+components/MovimentacoesLote.tsx | 100,00% | 100,00% | 100,00% | 97,50%
+components/NivelVencimentoBadge.tsx | 100,00% | 100,00% | 100,00% | 50,00%
+components/Pagination.tsx | 100,00% | 100,00% | 100,00% | 66,66%
+components/ProdutoCard.tsx | 100,00% | 100,00% | 100,00% | 60,00%
+components/RefreshNotice.tsx | 100,00% | 100,00% | 100,00% | 50,00%
+components/ScreenHeading.tsx | 100,00% | 100,00% | 100,00% | 50,00%
+components/theme.ts | 100,00% | 100,00% | 100,00% | 100,00%
+hooks/useAuth.tsx | 100,00% | 93,18% | 90,00% | 80,00%
+hooks/useKeyboardScroll.ts | 100,00% | 100,00% | 100,00% | 83,33%
+hooks/useLotes.ts | 100,00% | 100,00% | 100,00% | 85,71%
+hooks/useNotificacoes.ts | 0,00% | 0,00% | 0,00% | 0,00%
+hooks/usePerfil.ts | 100,00% | 100,00% | 100,00% | 100,00%
+hooks/useProdutos.ts | 100,00% | 100,00% | 100,00% | 0,00%
+hooks/useRefreshOnFocus.ts | 85,71% | 85,71% | 100,00% | 90,90%
+navigation/AppTabs.tsx | 75,00% | 68,18% | 50,00% | 85,71%
+navigation/AuthStack.tsx | 0,00% | 0,00% | 0,00% | 100,00%
+navigation/RootNavigator.tsx | 100,00% | 90,00% | 66,66% | 100,00%
+navigation/types.ts | 100,00% | 100,00% | 100,00% | 100,00%
+screens/AdicionarProdutoScreen.tsx | 95,40% | 95,86% | 84,00% | 94,93%
+screens/CategoriasScreen.tsx | 100,00% | 100,00% | 100,00% | 95,91%
+screens/DashboardScreen.tsx | 84,61% | 64,70% | 50,00% | 83,33%
+screens/DescontosScreen.tsx | 87,50% | 76,00% | 75,00% | 72,22%
+screens/EditarProdutoScreen.tsx | 97,43% | 94,00% | 80,00% | 78,12%
+screens/LixeiraScreen.tsx | 100,00% | 100,00% | 100,00% | 89,83%
+screens/LoginScreen.tsx | 100,00% | 100,00% | 100,00% | 93,75%
+screens/LoteDetalheScreen.tsx | 96,42% | 90,62% | 75,00% | 72,72%
+screens/LoteFormularioScreen.tsx | 100,00% | 100,00% | 100,00% | 94,02%
+screens/LotesListScreen.tsx | 80,76% | 75,86% | 53,84% | 78,57%
+screens/MoreScreen.tsx | 100,00% | 100,00% | 100,00% | 75,00%
+screens/ProdutoDetalheScreen.tsx | 94,82% | 87,67% | 70,00% | 83,33%
+screens/ProdutosListScreen.tsx | 86,95% | 85,71% | 71,42% | 90,62%
+screens/RelatoriosScreen.tsx | 94,73% | 93,87% | 88,23% | 87,50%
+screens/ScannerScreen.tsx | 100,00% | 100,00% | 100,00% | 85,00%
+utils/calendar.ts | 100,00% | 93,33% | 100,00% | 88,88%
+utils/formatters.ts | 96,42% | 84,93% | 100,00% | 80,26%
+utils/notifications.ts | 41,93% | 42,50% | 57,14% | 37,93%
+utils/storage.ts | 78,37% | 75,55% | 84,61% | 71,42%
+
+Saída da execução final
+
+> gerenciador-validades-mobile@1.0.0 test:coverage
+> jest --runInBand --coverage --coverageDirectory=../../work/mobile_cobertura_80_final --json --outputFile=../../work/mobile_jest_80_final.json
+
+PASS __tests__/produtos-telas.test.jsx (46.183 s)
+PASS __tests__/componentes-telas.test.jsx
+PASS __tests__/gestao-telas.test.jsx
+PASS __tests__/fluxos-app.test.jsx (6.158 s)
+PASS __tests__/lotes-telas.test.jsx
+PASS __tests__/sessao-interface.test.jsx
+PASS __tests__/cadastro-produto.test.ts
+PASS __tests__/auth.test.ts
+PASS __tests__/domain.test.ts
+PASS __tests__/storage-cache.test.ts
+PASS __tests__/errors.test.ts
+PASS __tests__/notifications-expo-go.test.ts
+PASS __tests__/calendar.test.ts
+
+Test Suites: 13 passed, 13 total
+Tests:       111 passed, 111 total
+Snapshots:   0 total
+Time:        61.114 s
+Ran all test suites.
+Test results written to: ../mobile_jest_80_final.json
+
+Testes aprovados
+1. cadastra produto e lote inicial com código "7891234567895"
+2. cadastra produto e lote inicial com código ""
+3. valida os campos do novo produto antes de enviar à API
+4. mantém o formulário preenchido quando o servidor recusa o cadastro
+5. cria uma categoria dentro do cadastro e seleciona a nova categoria
+6. exibe a falha de criação de categoria e permite cancelar
+7. recupera a lista de categorias após uma falha
+8. altera o nome, a categoria e o preço preservando o produto no cache
+9. valida nome e preço durante a edição e apresenta falha do servidor
+10. impede salvar uma categoria que deixou de existir
+11. adiciona código ao produto e abre as rotas de estoque
+12. informa código duplicado e permite fechar o formulário de código
+13. confirma exclusão de produto com resposta HTTP 204
+14. confirma exclusão de produto com resposta HTTP 500
+15. permite ao Caixa consultar produto sem botões de edição e exclusão
+16. busca produtos com espera de digitação e abre o detalhe
+17. distingue catálogo vazio de busca sem resultados
+18. valida login, alterna visibilidade da senha e envia credenciais
+19. mostra mensagem de login para erro HTTP 401
+20. mostra mensagem de login para erro HTTP 503
+21. abre opções gerenciais e encerra a sessão
+22. limita as opções da conta ao perfil Caixa
+23. aguarda a leitura da permissão da câmera
+24. solicita acesso à câmera com canAskAgain=true
+25. solicita acesso à câmera com canAskAgain=false
+26. ignora código vazio, bloqueia leituras duplicadas e controla lanterna
+27. rejeita códigos longos e permite tentar outro código
+28. fecha o modal depois de repassar o código lido
+29. encontra produto pelo código lido e abre seu detalhe
+30. oferece cadastro quando o código não está associado e permite nova leitura
+31. permite refazer busca de código após erro da API
+32. calendário respeita a data mínima, navega entre meses e retorna a data escolhida
+33. cancelar o calendário preserva a seleção existente
+34. paginação avança e retorna com os limites corretos
+35. revela o último campo focado e cancela a assinatura do teclado ao desmontar
+36. valida nome e prazos da categoria antes de criar
+37. cria categoria com prazos e limpa o formulário após confirmação
+38. edita categoria existente e permite cancelar uma edição seguinte
+39. exibe o erro do servidor ao salvar categoria
+40. exclusão de categoria depende da confirmação e trata HTTP 204
+41. exclusão de categoria depende da confirmação e trata HTTP 400
+42. Caixa consulta prazos sem controles de gestão
+43. refaz a consulta de categorias após erro inicial
+44. exibe a lixeira vazia e permite atualizar
+45. restaura categoria e remove o registro da lixeira após a confirmação da API
+46. restaura produto e remove o registro da lixeira após a confirmação da API
+47. restaura lote e remove o registro da lixeira após a confirmação da API
+48. conserva o registro excluído quando a restauração é recusada
+49. repete consultas da lixeira após uma falha inicial
+50. mantém dados anteriores da lixeira quando uma atualização falha
+51. consulta prejuízo e envia filtros de datas, categoria e produto
+52. exporta o CSV e aciona o compartilhamento com o tipo correto
+53. informa quando o aparelho não oferece compartilhamento
+54. mostra relatório sem lotes e recupera consulta após falha inicial
+55. mostra lotes prioritários e abre a lista pelo botão da tela inicial
+56. consulta o nível crítico e deixa de exibir o lote vencido ao aplicar o filtro
+57. mostra o preço original e o sugerido e filtra as sugestões por categoria
+58. não exibe a aba Descontos para o perfil Caixa após consultar o perfil
+59. permite repetir a consulta de lotes prioritários após falha da API
+60. valida produto, quantidade, custo e validade no cadastro de lote
+61. busca e seleciona produto e cria lote com data e valores normalizados
+62. mantém os dados do lote depois de um erro de cadastro
+63. edita somente o custo preservando a validade de um lote vencido
+64. envia a nova validade ao editar o lote
+65. recarrega o formulário de edição após uma falha inicial
+66. registra ENTRADA e mostra o novo saldo e o histórico
+67. registra SAIDA e mostra o novo saldo e o histórico
+68. registra AJUSTE e mostra o novo saldo e o histórico
+69. valida quantidade e motivo, trata saída recusada e mantém saldo anterior
+70. marca o lote como esgotado com ajuste para saldo zero
+71. Caixa pode registrar saída e não recebe ações de ajuste ou exclusão
+72. abre a edição do lote pelo detalhe
+73. exclui lote somente depois de confirmar e trata HTTP 204
+74. exclui lote somente depois de confirmar e trata HTTP 500
+75. restaura uma sessão válida ao montar o provedor
+76. ausência de sessão limpa as consultas e termina a restauração
+77. erro de leitura de credenciais encerra o estado de carregamento
+78. login salva as credenciais, atualiza a sessão e limpa dados da conta anterior
+79. logout apaga credenciais e dados consultados
+80. retorno ao primeiro plano e evento de sessão revalidam autenticação
+81. uma restauração antiga não substitui a sessão mais recente
+82. remove assinatura e intervalo de sessão ao desmontar
+83. navegador raiz apresenta login e cancela alertas quando a sessão termina
+84. entrada principal do aplicativo restaura a sessão e abre área autenticada
+85. interpreta preço em reais sem perder centavos
+86. formata e valida a data de validade brasileira
+87. bloqueia dia e mês impossíveis durante a digitação
+88. não aceita datas anteriores a hoje nem dias inexistentes
+89. cria produto, lote e código numa requisição
+90. busca código exato e abre seu produto
+91. edita e exclui produto pelas rotas da API
+92. 401 renova, salva refresh rotacionado e repete GET com novo Bearer
+93. refresh vencido limpa sessão e emite evento
+94. falha de rede na renovação mantém a sessão para nova tentativa
+95. erro temporário do servidor não apaga as credenciais
+96. refresh recusado pela API encerra somente a sessão atual
+97. renovação pendente não restaura sessão após logout
+98. contratos de leitura aceita lista simples do DRF atual
+99. contratos de leitura aceita resposta paginada futura
+100. contratos de leitura volta para página válida quando a lista diminui
+101. contratos de leitura calcula dias pela data de validade real
+102. contratos de leitura conta dias de calendário em UTC como a API
+103. contratos de leitura usa cadastro mais tempo de vencimento como alternativa
+104. contratos de leitura alerta crítico ocorre em horário futuro e antes de vencer
+105. contratos de leitura agenda aviso para o início da faixa crítica mesmo com app fechado
+106. reutiliza a sessão em memória e a atualiza após entrar ou sair
+107. traduz nomes de campos e junta mensagens da API
+108. não mostra HTML de erro do servidor no formulário
+109. abre no Expo Go sem carregar expo-notifications
+110. converte apenas datas reais sem deslocar o dia
+111. monta o mês começando na segunda-feira
+
+Histórico da execução inicial
+Execução em 17/11/2026 sobre o código do repositório na revisão 11a9e08.
+
+Backend Django
+Os 99 testes de produtos, gerente e usuarios passaram em 19,454 s. A
+configuração mysite.test_settings usa SQLite em memória. O Coverage.py
+7.17.3 mediu os módulos de produção desses três aplicativos com
+ramificações habilitadas, excluídos os arquivos de migração e de teste.
+Foram exercitadas 1.007 de 1.224 linhas (82,27%) e 162 de 254
+ramificações (63,78%). A métrica combinada do Coverage.py foi 79,09%,
+arredondada para 79% na saída textual.
+
+Aplicativo Expo
+Foram aprovados 27 testes em sete suítes no diretório
+gerenciador-validades-expo. O Jest rodou sem cache, em série, em 7,446 s.
+A coleta abrangeu arquivos TS e TSX em src, excluindo src/types. Foram
+exercitadas 186 de 979 linhas (18,99%), 147 de 1.023 ramificações
+(14,36%), 53 de 374 funções (14,17%) e 213 de 1.227 instruções (17,35%).
+
+Comandos de referência
+
+A partir do diretório que contém manage.py, com Coverage.py instalado
+e a configuração de testes do projeto disponível:
+
+  DJANGO_SETTINGS_MODULE=mysite.test_settings python -m coverage run \
+    --branch --source=produtos,gerente,usuarios \
+    --omit='*/migrations/*,*/tests/*,*/tests.py,*/test_*.py' \
+    manage.py test produtos gerente usuarios --noinput
+  python -m coverage report -m
+  python -m coverage json -o cobertura_django.json
+
+A partir do diretório gerenciador-validades-expo, com as dependências
+instaladas:
+
+  node node_modules/jest/bin/jest.js --runInBand --no-cache --coverage \
+    --collectCoverageFrom='src/**/*.{ts,tsx}' \
+    --collectCoverageFrom='!src/types/**' --coverageReporters=text \
+    --coverageReporters=text-summary --coverageReporters=json-summary
+
+Saída do executor Django
+Creating test database for alias 'default'...
+...................................................................................................
+----------------------------------------------------------------------
+Ran 99 tests in 19.454s
+
+OK
+Destroying test database for alias 'default'...
+Found 99 test(s).
+System check identified no issues (0 silenced).
+
+Saída do Coverage.py por arquivo
+Name                                                        Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------------------
+gerente/__init__.py                                             0      0      0      0   100%
+gerente/forms.py                                               66     14     12      2    74%   21, 23, 83-98, 135-139
+gerente/urls.py                                                 4      0      0      0   100%
+gerente/views.py                                              218     74     26      2    61%   33, 67-68, 78-79, 84-87, 98, 108-109, 119-120, 125-128, 138-155, 158-160, 170-171, 181-182, 187-190, 197-204, 245->247, 247->250, 275, 285-286, 292-296, 306-331, 334-336
+produtos/admin.py                                              52      2      8      2    93%   18, 29->28, 89
+produtos/management/__init__.py                                 0      0      0      0   100%
+produtos/management/commands/__init__.py                        0      0      0      0   100%
+produtos/management/commands/calcular_nivel_vencimento.py      17      0      6      0   100%
+produtos/management/commands/povoar_demo.py                    53     53     16      0     0%   3-122
+produtos/models.py                                            216     17     34      5    88%   14, 90->exit, 122-123, 126, 314, 329, 340-346, 356, 360, 375, 399
+produtos/pagination.py                                          5      0      0      0   100%
+produtos/serializers.py                                       187     23     56      8    84%   48, 59-67, 151-152, 165-166, 168, 198, 212, 220, 256, 276-283
+produtos/urls.py                                                9      0      0      0   100%
+produtos/views.py                                             251     25     66     12    88%   39-41, 45, 49-51, 78, 123, 129, 139, 146, 153-154, 156, 163-164, 166, 215-216, 234-236, 255, 286, 301->303, 303->306
+usuarios/admin.py                                              11      0      0      0   100%
+usuarios/models.py                                             21      1      2      0    96%   35
+usuarios/permissions.py                                        35      2     16      2    92%   44, 46
+usuarios/serializers.py                                        46      3      6      3    88%   26->33, 32, 37->40, 69-70
+usuarios/urls.py                                                5      0      0      0   100%
+usuarios/views.py                                              28      3      6      0    91%   24-26
+-------------------------------------------------------------------------------------------------------
+TOTAL                                                        1224    217    254     36    79%
+
+Saída do Jest com cobertura por arquivo
+PASS __tests__/cadastro-produto.test.ts
+PASS __tests__/auth.test.ts
+PASS __tests__/domain.test.ts
+PASS __tests__/storage-cache.test.ts
+PASS __tests__/errors.test.ts
+PASS __tests__/notifications-expo-go.test.ts
+PASS __tests__/calendar.test.ts
+-----------------------------|---------|----------|---------|---------|-------------------------
+File                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-----------------------------|---------|----------|---------|---------|-------------------------
+All files                    |   17.35 |    14.36 |   14.17 |   18.99 |
+ src                         |       0 |      100 |       0 |       0 |
+  App.tsx                    |       0 |      100 |       0 |       0 | 7-12
+ src/api                     |   61.64 |    62.76 |   46.29 |   63.49 |
+  auth.ts                    |   41.17 |     37.5 |   33.33 |   42.85 | 5-12,19-20,26
+  client.ts                  |   90.38 |    82.85 |     100 |   97.61 | 69
+  errors.ts                  |   79.16 |    70.96 |     100 |   94.44 | 26
+  lotes.ts                   |       0 |        0 |       0 |       0 | 6-73
+  pagination.ts              |     100 |      100 |     100 |     100 |
+  produtos.ts                |      48 |    33.33 |    37.5 |      48 | 22-27,36-37,46-58,76-85
+  relatorios.ts              |       0 |      100 |       0 |       0 | 5-31
+ src/components              |       0 |        0 |       0 |       0 |
+  ActionButton.tsx           |       0 |        0 |       0 |       0 | 16-18
+  CodeCamera.tsx             |       0 |        0 |       0 |       0 | 9-51
+  CodeScannerModal.tsx       |       0 |        0 |       0 |       0 | 12-22
+  DatePickerField.tsx        |       0 |        0 |       0 |       0 | 8-80
+  EmptyState.tsx             |       0 |        0 |       0 |       0 | 13
+  ErrorState.tsx             |       0 |        0 |       0 |       0 | 6-10
+  LoadingState.tsx           |       0 |        0 |       0 |       0 | 5
+  LoteCard.tsx               |       0 |        0 |       0 |       0 | 9-10
+  MovimentacoesLote.tsx      |       0 |        0 |       0 |       0 | 12-62
+  NivelVencimentoBadge.tsx   |       0 |        0 |       0 |       0 | 5-16
+  Pagination.tsx             |       0 |        0 |       0 |       0 | 7-14
+  ProdutoCard.tsx            |       0 |        0 |       0 |       0 | 8
+  RefreshNotice.tsx          |       0 |        0 |       0 |       0 | 6-7
+  ScreenHeading.tsx          |       0 |        0 |       0 |       0 | 5
+  theme.ts                   |       0 |      100 |     100 |       0 | 3-16
+ src/hooks                   |       0 |        0 |       0 |       0 |
+  useAuth.tsx                |       0 |        0 |       0 |       0 | 14-60
+  useKeyboardScroll.ts       |       0 |        0 |       0 |       0 | 7-31
+  useLotes.ts                |       0 |        0 |       0 |       0 | 6-10
+  useNotificacoes.ts         |       0 |        0 |       0 |       0 | 9-22
+  usePerfil.ts               |       0 |        0 |       0 |       0 | 16-24
+  useProdutos.ts             |       0 |        0 |       0 |       0 | 5-13
+  useRefreshOnFocus.ts       |       0 |        0 |       0 |       0 | 5-14
+ src/navigation              |       0 |        0 |       0 |       0 |
+  AppTabs.tsx                |       0 |        0 |       0 |       0 | 25-90
+  AuthStack.tsx              |       0 |      100 |       0 |       0 | 5-7
+  RootNavigator.tsx          |       0 |        0 |       0 |       0 | 11-20
+  types.ts                   |       0 |        0 |       0 |       0 |
+ src/screens                 |       0 |        0 |       0 |       0 |
+  AdicionarProdutoScreen.tsx |       0 |        0 |       0 |       0 | 22-189
+  CategoriasScreen.tsx       |       0 |        0 |       0 |       0 | 15-88
+  DashboardScreen.tsx        |       0 |        0 |       0 |       0 | 19-51
+  DescontosScreen.tsx        |       0 |        0 |       0 |       0 | 16-40
+  EditarProdutoScreen.tsx    |       0 |        0 |       0 |       0 | 20-90
+  LixeiraScreen.tsx          |       0 |        0 |       0 |       0 | 17-81
+  LoginScreen.tsx            |       0 |        0 |       0 |       0 | 12-59
+  LoteDetalheScreen.tsx      |       0 |        0 |       0 |       0 | 22-76
+  LoteFormularioScreen.tsx   |       0 |        0 |       0 |       0 | 19-106
+  LotesListScreen.tsx        |       0 |        0 |       0 |       0 | 20-73
+  MoreScreen.tsx             |       0 |        0 |       0 |       0 | 12-36
+  ProdutoDetalheScreen.tsx   |       0 |        0 |       0 |       0 | 25-129
+  ProdutosListScreen.tsx     |       0 |        0 |       0 |       0 | 20-55
+  RelatoriosScreen.tsx       |       0 |        0 |       0 |       0 | 21-102
+  ScannerScreen.tsx          |       0 |        0 |       0 |       0 | 17-36
+ src/utils                   |   71.09 |    65.18 |   82.35 |   77.94 |
+  calendar.ts                |   86.66 |    77.77 |     100 |     100 | 9-11
+  formatters.ts              |   80.82 |    72.36 |      90 |   92.85 | 17,34-35,90
+  notifications.ts           |    42.5 |    37.93 |   57.14 |   41.93 | 13-19,34-48,62-64
+  storage.ts                 |   75.55 |    71.42 |   84.61 |   78.37 | 32-34,59,66-69
+-----------------------------|---------|----------|---------|---------|-------------------------
+
+=============================== Coverage summary ===============================
+Statements   : 17.35% ( 213/1227 )
+Branches     : 14.36% ( 147/1023 )
+Functions    : 14.17% ( 53/374 )
+Lines        : 18.99% ( 186/979 )
+================================================================================
+
+Test Suites: 7 passed, 7 total
+Tests:       27 passed, 27 total
+Snapshots:   0 total
+Time:        7.446 s
+Ran all test suites.
+
+Conferência com pytest-cov
+
+A reexecução em 17/11/2026 usou pytest 9.2.0, pytest-django 4.14.0,
+pytest-cov 7.1.0 e Coverage.py 7.17.3. Foram aprovados 99 testes em
+34,44 s, com SQLite em memória sob mysite.test_settings. Os totais
+coincidiram com a primeira execução. Os casos incluem 27 de modelos,
+12 do comando de vencimento, cinco da administração, 30 de API e
+fluxo móvel, 18 do relatório web e sete de permissões da API.
+
+Comando de referência, no diretório que contém manage.py:
+
+  DJANGO_DEBUG=1 python -m pytest --ds=mysite.test_settings \
+    -o 'python_files=test*.py' --cov=produtos --cov=gerente --cov=usuarios \
+    --cov-branch --cov-config=coveragerc --cov-report=term-missing \
+    --cov-report=json:pytest_cobertura.json produtos gerente usuarios
+
+O coveragerc usado definiu run.omit para */migrations/*, */tests/*,
+*/tests.py e */test_*.py.
+
+Saída do pytest-cov
+============================= test session starts ==============================
+platform linux -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0
+django: version: 6.0.7, settings: mysite.test_settings (from option)
+plugins: cov-7.1.0, django-4.14.0
+collected 99 items
+
+produtos/tests/test_admin.py .....                                       [  5%]
+produtos/tests/test_api_lotes.py ....................                    [ 25%]
+produtos/tests/test_calcular_nivel_vencimento.py ............            [ 37%]
+produtos/tests/test_mobile_flow.py ..........                            [ 47%]
+produtos/tests/test_models.py ...........................                [ 74%]
+gerente/tests/test_prejuizo_view.py ..................                   [ 92%]
+usuarios/test_permissions.py .......                                     [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.10-final-0 _______________
+
+Name                                                        Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------------------
+gerente/__init__.py                                             0      0      0      0   100%
+gerente/forms.py                                               66     14     12      2    74%   21, 23, 83-98, 135-139
+gerente/urls.py                                                 4      0      0      0   100%
+gerente/views.py                                              218     74     26      2    61%   33, 67-68, 78-79, 84-87, 98, 108-109, 119-120, 125-128, 138-155, 158-160, 170-171, 181-182, 187-190, 197-204, 245->247, 247->250, 275, 285-286, 292-296, 306-331, 334-336
+produtos/admin.py                                              52      2      8      2    93%   18, 29->28, 89
+produtos/management/__init__.py                                 0      0      0      0   100%
+produtos/management/commands/__init__.py                        0      0      0      0   100%
+produtos/management/commands/calcular_nivel_vencimento.py      17      0      6      0   100%
+produtos/management/commands/povoar_demo.py                    53     53     16      0     0%   3-122
+produtos/models.py                                            216     17     34      5    88%   14, 90->exit, 122-123, 126, 314, 329, 340-346, 356, 360, 375, 399
+produtos/pagination.py                                          5      0      0      0   100%
+produtos/serializers.py                                       187     23     56      8    84%   48, 59-67, 151-152, 165-166, 168, 198, 212, 220, 256, 276-283
+produtos/urls.py                                                9      0      0      0   100%
+produtos/views.py                                             251     25     66     12    88%   39-41, 45, 49-51, 78, 123, 129, 139, 146, 153-154, 156, 163-164, 166, 215-216, 234-236, 255, 286, 301->303, 303->306
+usuarios/admin.py                                              11      0      0      0   100%
+usuarios/models.py                                             21      1      2      0    96%   35
+usuarios/permissions.py                                        35      2     16      2    92%   44, 46
+usuarios/serializers.py                                        46      3      6      3    88%   26->33, 32, 37->40, 69-70
+usuarios/urls.py                                                5      0      0      0   100%
+usuarios/views.py                                              28      3      6      0    91%   24-26
+-------------------------------------------------------------------------------------------------------
+TOTAL                                                        1224    217    254     36    79%
+============================= 99 passed in 34.44s ==============================
