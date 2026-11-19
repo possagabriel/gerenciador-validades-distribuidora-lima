@@ -1,6 +1,6 @@
 # Gerenciador de Validades — Distribuidora Lima (mobile)
 
-App de gestão em React Native, Expo SDK 57 e TypeScript. Este repositório contém apenas o aplicativo mobile. Para login, catálogo, lotes e relatórios, o app precisa de uma API Django compatível executada separadamente.
+App de gestão em React Native, Expo SDK 57 e TypeScript. Este repositório contém o aplicativo mobile e o [pacote de replicação do TCC](replicacao/README.md). Para login, catálogo, lotes e relatórios, o app precisa de uma API Django compatível executada separadamente.
 
 ## Pré-requisitos
 

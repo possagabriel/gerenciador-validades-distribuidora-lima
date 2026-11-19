@@ -1,6 +1,6 @@
 # Gerenciador de Validades — app mobile
 
-Este repositório versiona apenas o aplicativo Expo/React Native. O backend Django é mantido separadamente e não deve ser incluído em commits deste repositório.
+Este repositório versiona o aplicativo Expo/React Native e o material de replicação do TCC. O backend Django é mantido separadamente. Um snapshot do backend usado no caso demonstrativo é distribuído no ZIP da pasta `replicacao`, acompanhado de dados sintéticos e instruções.
 
 ## Desenvolvimento
 
