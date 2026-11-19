@@ -10,6 +10,9 @@ arquivos originais.
 O aplicativo móvel foi desenvolvido por Gabriel Possa Lima. O backend,
 a API e o painel foram desenvolvidos por Darlan José dos Santos.
 
+O código original incluído no pacote é distribuído sob a [licença MIT](../LICENSE).
+Uma cópia da licença acompanha o ZIP.
+
 Na conferência de 19/11/2026, passaram os 99 testes do backend. O roteiro
 também confirmou o lote crítico, a associação do código ao suco, a
 sugestão de R$ 9,38, a saída de 20 para 17 unidades e o total de R$ 35,00
@@ -18,7 +21,7 @@ do lote vencido. A saída foi revertida ao terminar a verificação.
 SHA-256 do ZIP
 
 ```text
-64402b58f42ae551bb5c44b284a6b0b6e497d29b6d5303b12d2931fa933f527c
+70287c5d19ad013ce69cd7f45d9155cdac96c41f642dad164137778494edf643
 ```
 
 Os resultados da suíte móvel e a medição original do backend estão no

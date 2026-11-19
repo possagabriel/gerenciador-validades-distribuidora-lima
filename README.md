@@ -2,6 +2,8 @@
 
 App de gestão em React Native, Expo SDK 57 e TypeScript. Este repositório contém o aplicativo mobile e o [pacote de replicação do TCC](replicacao/README.md). Para login, catálogo, lotes e relatórios, o app precisa de uma API Django compatível executada separadamente.
 
+O código original do aplicativo e do pacote de replicação é distribuído sob a [licença MIT](LICENSE). As dependências de terceiros seguem suas próprias licenças.
+
 ## Pré-requisitos
 
 - Node.js 22.13 ou superior e npm.
